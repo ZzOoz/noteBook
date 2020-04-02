@@ -383,11 +383,264 @@ export default {
 
 答：可以销毁子组件、销毁自定义事件（event.$off）不去占用内存
 
-#### 2.props（类型和默认值）
+#### 2.组件间的通信
 
-#### 3.v-on和$emit
+参考文章:https://segmentfault.com/a/1190000019208626#item-6
 
-#### 4.自定义事件
+**2.0、父子组件间通信（$parent和$children）**
+
+**2.1、父子组件间通信（prop和$emit）**
+
+**2.2、兄弟组件间通信（event.$emit和event.$on）**
+
+**介绍**：这里实现通过在一个js文件中初始化一个新的实例(new Vue)将其导出，然后通过引用这个实例调用$on（监听事件的组件同时接收值）和$emit（需要触发事件的组件同时可以传值）互相传值
+
+**示例**：
+
+index.js文件
+
+```js
+import Vue from 'vue'
+
+export default new Vue()
+```
+
+
+
+```js
+// bro1.vue组件
+<template>
+  <div>
+      <div>我是bro1组件 {{title}}</div>
+  </div>
+</template>
+
+<script>
+import Event from './index'
+export default {
+  name: 'bro1',
+  data(){
+      return{
+          title:""
+      }
+  },
+  mounted(){
+      Event.$on('brotherEvent',(val)=>{
+          this.title = val
+          console.log(val)
+      })
+  }
+}
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped lang="scss">
+</style>
+
+```
+
+
+
+```js
+// bro2.vue组件
+<template>
+  <div>
+    <div>我是bro2组件</div>
+    <button @click="sendEventFromBro2">bro2</button>
+
+  </div>
+</template>
+
+<script>
+import Event from './index'
+export default {
+    name: 'bro2',
+    data(){
+        return{
+            title:'我是bro2组件的title'
+        }
+    },
+    methods:{
+      sendEventFromBro2(){
+          Event.$emit('brotherEvent',this.title)
+      }
+  } 
+}
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped lang="scss">
+</style>
+
+```
+
+引用bro1和bro2组件的主组件**(点击bro2的事件会触发bro1的监听成功将title值变成bro2传过去的值)**
+
+```js
+<template>
+  <div>
+  <bro1 /> 
+  <bro2 />
+  </div>
+</template>
+
+<script>
+import bro1 from '../components/EventBus/bro1.vue'
+import bro2 from '../components/EventBus/bro2.vue'
+
+export default {
+  name: 'EventBus',
+  components: {
+    bro1,
+    bro2
+  }
+}
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped lang="scss">
+</style>
+
+```
+
+**2.3、跨级组件通信（$attr和$listener）**
+
+**介绍**： $attrs--继承所有的父组件属性（除了组件内prop属性、class 和 style ）
+
+​			inheritAttrs：默认值true,继承所有的父组件属性（除props的特定绑定）作为普通的HTML特性应用在子组件的根元素上，如果你不希望组件的根元素继承特性设置inheritAttrs: false,但是class属性会继承
+
+​			$listeners--属性，它是一个对象，里面包含了作用在这个组件上的所有监听器（不含.native修饰符），你就可以配合 `v-on="$listeners"` 将所有的事件监听器指向这个组件的某个特定的子元素。
+
+**示例**：
+
+```js
+// index.vue
+<template>
+  <div>
+    <h2>我是index.vue</h2>
+    <child-com1
+      :foo="foo"
+      :boo="boo"
+      :coo="coo"
+      :doo="doo"
+      title="前端工匠"
+	  @Event="sendEvent" 
+    ></child-com1>
+  </div>
+</template>
+<script>
+const childCom1 = () => import("./childCom1.vue");
+export default {
+  components: { childCom1 },
+  data() {
+    return {
+      foo: "Javascript",
+      boo: "Html",
+      coo: "CSS",
+      doo: "Vue"
+    };
+  },
+  methods:{
+      sendEvent(){
+          console.log("我是祖先组件传来的事件")
+      }
+  }
+};
+</script>
+```
+
+childCom1.vue中
+
+```js
+// childCom1.vue
+<template class="border">
+  <div>
+    <p>foo: {{ foo }}</p>
+    <p>childCom1的$attrs: {{ $attrs }}</p>
+    <child-com2 v-bind="$attrs"></child-com2>
+  </div>
+</template>
+<script>
+const childCom2 = () => import("./childCom2.vue");
+export default {
+  components: {
+    childCom2
+  },
+  inheritAttrs: false, // 可以关闭自动挂载到组件根元素上的没有在props声明的属性
+  props: {
+    foo: String // foo作为props属性绑定
+  },
+  created() {
+    // 注意这里已经没有foo属性了，foo已经是被childCom1当作prop属性了
+    console.log(this.$attrs); // { "boo": "Html", "coo": "CSS", "doo": "Vue", "title": "前端工匠" }
+  }
+};
+</script>
+```
+
+childeCom2.vue
+
+```js
+// childCom2.vue
+<template>
+  <div class="border">
+    <p>boo: {{ boo }}</p>
+    <p>childCom2: {{ $attrs }}</p>	
+    <!-- 这里要绑定listeners事件就可以监听所有的祖先事件啦 -->
+    <child-com3 v-bind="$attrs" v-on="$listeners"></child-com3> 
+  </div>
+</template>
+<script>
+const childCom3 = () => import("./childCom3.vue");
+export default {
+  components: {
+    childCom3
+  },
+  inheritAttrs: false,
+  props: {
+    boo: String
+  },
+  created() {
+  // 注意这里已经也没有boo属性了
+    console.log(this.$attrs); // {"coo": "CSS", "doo": "Vue", "title": "前端工匠" }
+  }
+};
+</script>
+```
+
+childCom3.vue
+
+```js
+// childCom3.vue
+<template>
+  <div class="border">
+    <p>childCom3: {{ $attrs }}</p>
+  </div>
+</template>
+<script>
+export default {
+  props: {
+    coo: String,  // 成功传到
+    title: String // 成功传到
+  },
+  methods:{
+	demo(){
+		this.$emit("Event") // 触发祖先组件的事件
+    }
+  }
+};
+</script>
+```
+
+**2.4、跨级组件通信（$provide和$inject）**
+
+**介绍**：以允许一个祖先组件向其所有子孙后代注入一个依赖，不论组件层次有多深，并在起上下游关系成立的时间里始终生效。换句人话：祖先组件中通过provider来提供变量，然后在子孙组件中通过inject来注入变量
+
+2.4.1、$provide和$inject需要成对使用，同时在后代组件inject注入后改变祖先组件的属性后是不会响应式改变值的
+
+2.4.2、
+
+
 
 ## Vue-router
 

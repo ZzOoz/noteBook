@@ -646,8 +646,698 @@ export default {
 
 2.4.2、
 
+# C、Vue高级特性
+
+### 1、自定义v-model
+
+### 2、$nextTick
+
+**介绍**：Vue是异步渲染的，即data改变之后DOM不会立刻渲染，$nextTick会在DOM渲染之后被触发，以获取最新的dom节点
+
+2.1、vue组件更新之后如何获取最新的DOM?
+
+答：通过nextTick
+
+2.2、例子：
+
+```js
+<template>
+  <div>
+      <ul ref="ulList" >
+          <li v-for="(item,index) in list" :key="index">{{item}}</li>
+      </ul>
+      <button type="button" @click="insert">插入</button>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'HelloWorld',
+  data(){
+      return {
+          list:[
+              {name:'a'},
+              {name:'b'},
+              {name:'c'}              
+          ]
+      }
+  },
+  methods:{
+      insert(){
+          this.list.push({name:'d'})
+          this.list.push({name:'e'})
+          this.list.push({name:'f'})
+          
+          // 因为vue是异步渲染的，如果用这种方法是获取不到最新dom的ulList的长度的
+          // 此时dom还没有更新
+          //  let ulList = this.$refs.ulList.childNodes.length
+
+          // 要用nextTick方法等到dom更新在计算
+          // 此时就可以拿到最新的dom,无论多少次更新data，vue的重新渲染都只会有一次
+          this.$nextTick(()=>{
+
+              let ulList = this.$refs.ulList.childNodes.length
+              console.log(ulList,'长度')
+          })
+          
+      }
+  }
+}
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped lang="scss">
+</style>
+
+```
 
 
-## Vue-router
 
-## Vuex
+### 3、slot（插槽）
+
+**介绍**：通俗的说就是父组件想往子组件插入内容，那么就会通过插槽来插入内容到子组件
+
+##### **3.1、普通插槽**
+
+**介绍**：当子组件内加入slot标签（内容自定义）当父组件在子组件内没有插入内容就会使用子组件自己slot标签的默认内容，当父组件有内容插入进去那么就会使用父组件插入的内容
+
+**例子**：
+
+```
+
+```
+
+
+
+##### 3.2、作用域插槽
+
+**介绍**：当父组件需要使用子组件的数据来显示在父组件本身时，就要用到作用域插槽
+
+**例子**：
+
+父组件
+
+```js
+<template>
+  <div>
+      <ScopeSlot>
+          <template v-slot="slotProps">
+              <!-- 获取子组件的data中的sonlist的name -->
+              <!-- 此时已经引入name属性 -->
+              {{slotProps.slotData.name}}
+          </template>
+      </ScopeSlot>
+  </div>
+</template>
+
+<script>
+import ScopeSlot from '../components/SlotDemo/ScopeSlot'
+export default {
+  name: 'ScopeSlot12',
+  components:{
+      ScopeSlot
+  },
+  data(){
+      return {
+          list:{
+              name:'我是父组件',
+              number:12,
+              scope:1
+          }
+      }
+  }
+}
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped lang="scss">
+</style>
+
+```
+
+
+
+子组件
+
+
+
+
+
+
+
+
+
+
+
+##### 3.3、具名插槽
+
+介绍：子组件内有各个名字的组件，父组件可以调用相应的名字嗲用子组件的插槽
+
+例子：
+
+父组件调用子组件的插槽名
+
+```js
+<template>
+  <div>
+      <NameSlot>
+          <div name="header"></div>
+          <div></div>
+          <div name="footer"></div>
+
+      </NameSlot>
+  </div>
+</template>
+
+<script>
+import NameSlot from '../components/SlotDemo/NameSlot'
+export default {
+  name: 'NameSlot1',
+  components:{
+      NameSlot
+  },
+  data(){
+      return {
+
+      }
+  }
+}
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped lang="scss">
+</style>
+
+```
+
+子组件
+
+```js
+<template>
+  <div>
+      <slot name="header">我是头部</slot>
+      <div>我是具名插槽子组件</div>
+      <slot name="footer">我是底部</slot>
+
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'NameSlot'
+}
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped lang="scss">
+</style>
+
+```
+
+
+
+### 4、动态&异步组件
+
+##### **4.1、动态组件**
+
+**介绍**：vue提供了一种componet标签绑定is并且切换属性值可以动态更换不同类型的组件
+
+**使用场景**： 1.:is="component-name" 用法
+
+​					2.需要根据数据，动态渲染的场景，即组件类型不确定
+
+**例子**：
+
+```js
+<template>
+  <div>
+      <!-- 结果渲染出home、about、EventBus组件 -->
+      <div v-for="(item,key) in componentsData" :key="key">
+          <!-- 动态组件遍历componentsData通过item来动态切换组件 -->
+          <component :is="item.type" />
+      </div>
+  </div>
+</template>
+
+<script>
+import Home from './Home'
+import About from './About'
+import EventBus from './EventBus'
+
+export default {
+    components:{
+        About,
+        Home,
+        EventBus
+    },
+    data(){
+        return {
+            componentsData:{
+                1:{type:"Home"},
+                2:{type:'About'},
+                3:{type:'EventBus'}
+            }
+        }
+    }
+}
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped lang="scss">
+</style>
+
+```
+
+##### 4.2、异步组件
+
+参考：https://segmentfault.com/a/1190000012138052（建议看）
+
+**介绍**：当需要加载一个比较大的组件或者说想要在使用时才加载组件时可以使用异步组件加载的方式
+
+**使用**：1.import()函数、2.按需加载，异步加载大组件
+
+**简单例子**：
+
+```js
+//按需异步加载组件
+<template>
+  <div>
+    <div>按需异步加载组件</div>
+    <Home v-if="showFlag"/>
+    <button type="button" @click="show">显示加载异步组件</button>
+  </div>
+</template>
+
+<script>
+ // 我们通常使用这种方式来加载组件的
+ // 但是当组件太大或者是想在必要的时候加载那么就可以使用异步加载的方式
+// import Home from './Home'  
+export default {
+  name: 'AsyncComponents',
+  components:{
+      // 这种就是异步加载的方式
+      Home:()=>import('./Home')
+  },
+  data(){
+      return {
+          showFlag:false
+      }
+  },
+  methods:{
+      show(){
+          this.showFlag = !this.showFlag
+      }
+  }
+}
+</script>
+
+```
+
+
+
+### 5、keep-alive
+
+**介绍**：keep-alive是一种缓存组件的方式，可以对已有组件的状态保存（在切换到下一个组件的时候）
+
+**使用**：可以在例如tab组件切换的时候使用
+
+**例子**：
+
+
+
+### 6、mixin
+
+**介绍**：多个组件有相同的逻辑，可以抽取出来，同时可以简化代码，在组件mixins选项中可以加入多个mixin
+
+**例子**：
+
+mixin.js(多个组件中的共同属性)
+
+```js
+export default {
+    data() {
+        return {
+            city: '中山'
+        }
+    },
+    methods: {
+        showName() {
+            alert(this.name)
+        }
+    }
+}
+```
+
+mixin组件
+
+```js
+<template>
+  <div>
+      <div>
+          {{name}}--{{age}}--{{city}}
+      </div>
+      <button type="button" @click="showName">显示名称</button>
+  </div>
+</template>
+
+<script>
+import Mixin from './mixin'
+export default {
+    mixins:[Mixin],// 可以引入多个mixin
+    data(){
+    return{
+        // 此处加入mixin之后已经有city属性了以及showName方法
+        name:'hyt',
+        age:12
+    }
+  }
+}
+</script>
+```
+
+# D、vue原理
+
+### 1、组件化和MVVM
+
+##### **1.1、组件化是什么？**
+
+**答**：组件化的意思时将一个项目（代码）划分多个组件，通过组件的任意组合来实现项目的功能
+
+##### 1.2、MVVM为什么会出现？是什么？
+
+**1、为什么会出现？**
+
+在很久以前就已经有组件化的概念，但是那时候在模板渲染完成之后页面数据就是如此了，如果要更新数据就需要操作DOM，但是因为操作DOM是一件非常消耗性能的事情，同时处理起来很难有条理，那么就诞生了数据驱动视图的概念，意思就是不用去关注dom操作，我们只需要关注数据的变化来改变视图的显示，于是就出现了vue、react等框架，他们的能够实现数据驱动视图的原理时MVVM（vue）、setData（react）
+
+**2、是什么？**
+
+MVVM是一种实现数据驱动视图的一种方式，M是model层（可以看作数据data）、V是视图层（可以看做页面dom等）、VM是视图模型（可以看作是连接M和V的一种桥梁，例如methods、事件、mixin等）
+
+### 2、响应式原理（这是实现数据驱动视图的第一步）
+
+##### 2.1、响应式是什么？
+
+答：组件data数据一旦发生变化，会立即触发视图的更新
+
+##### 2.2、实现响应式原理的核心api是什么？
+
+答：Object.defineProperty方法，Vue3中使用Proxy
+
+##### 2.3、Object.defineProperty方法实现响应式
+
+###### 2.3.1、监听对象，监听数组、深度监听
+
+```js
+// 简单实现vue响应式原理
+
+let data = {
+    name: 'hyt',
+    age: 12,
+    list: ['a', 'b', 'c'],
+    city: {
+        provice: '广东'
+    }
+}
+
+// 视图更新类方法
+function updateView() {
+    console.log('视图更新')
+}
+
+// 深度监听数组的方法
+let arrayProto = Array.prototype
+    // 新创建一个对象，但是在扩展原型上同名的方法是不会影响原有的
+let newArray = Object.create(arrayProto);
+['push', 'pop', 'unshift', 'shift'].forEach(methodName => {
+    newArray[methodName] = function() {
+        updateView();
+        // 这里实质上是Array.prototype.原型方法.call(this,arguments)
+        arrayProto[methodName].call(this, ...arguments)
+
+    }
+})
+
+function observer(target) {
+    // 如果不是对象且不是null 直接返回值 这里只是实现监听对象和监听数组
+    if (typeof target !== 'object' && target !== null) {
+        return target
+    }
+
+    // 如果是数组直接将原型付给target
+    if (Array.isArray(target)) {
+        target.__proto__ = newArray
+    }
+
+    console.log(target)
+        // 遍历循环target获取key同时也可以获取值
+    for (const key in target) {
+        // 如果是新增属性这里是监听不到的 因为实在调用observer方法在先 
+        // console.log(key)
+        // 对target中的数据进行监听
+
+        defineReactive(target, key, target[key])
+    }
+}
+
+// 核心api 实现响应式
+function defineReactive(target, key, value) {
+    // 如果要监听对象需要再次递归调用observer方法
+    // 如果不使用observer方法 如例子一样监听这里只是到了data.city这里是没有办法到达data.city.province
+    observer(value) // 因此在这里调用observer递归到最底部
+
+    Object.defineProperty(target, key, {
+        get: function() {
+            return value
+        },
+        set: function(newVal) {
+            // 这里也需要监听因为 set的时候又可能是data.age = {num:12}
+            if (newVal !== value) {
+                observer(key)
+                value = newVal;
+                // 设置完成后更新视图
+                updateView()
+            }
+
+        }
+    })
+}
+
+
+//调用监听data的方法
+observer(data)
+
+// 1.监听完成后修改数据 仅仅是已经存在的值
+data.name = 'tyh';
+data.age = 100
+
+// 2.新增属性、删除属性是不能发生视图更新
+// 这时候就需要使用Vue.set 和 Vue.delete
+data.gender = 1
+
+// 3.深度监听对象
+data.city.provice = '广东东'
+
+// 4.深度监听数组
+data.list.push('d')
+console.log(data.list)
+```
+
+
+
+###### 2.3.2、几个缺点
+
+​	1.深度监听，需要递归到底，一次性计算量大
+
+​	2.无法监听新增属性/删除属性（需要使用Vue.set和Vue.delete）
+
+​	3.无法原生监听数组，需要特殊处理
+
+### 3、vdom和diff算法
+
+##### 3.1、vdom诞生背景：（基于数据驱动视图，为了更加高性能地操作DOM）
+
+​		1、DOM操作非常耗性能，
+
+​		2、以前是用jq可以自行控制DOM操作时机，Vue和react是数据驱动视图如何有效控制DOM操作？
+
+​		3、因为js执行速度非常快，那么可以将js模拟DOM结构，计算最小的变更操作dom
+
+##### 3.2、vdom结构
+
+这里是一个html片段（dom结构）
+
+```html
+    <div id="div1" class="container">
+        <p>vdom</p>
+        <ul style="font-size:20px">
+            <li>a</li>
+        </ul>
+    </div>
+```
+
+通过vdom形式表示
+
+```js
+{
+    tag: 'div',
+    props: {
+        className: 'container',
+        id: 'div1'
+    }
+    children: [{
+            tag: 'p',
+            children: 'vdom'
+        },
+        {
+            tag: 'ul',
+            props: { style: 'font-size:20px' },
+            children: [{
+                tag: "li",
+                children: 'a'
+            }]
+        }
+    ]
+}
+```
+
+##### 3.4、diff算法的规则优化时间复杂度O(n)
+
+1、只比较同一层级，不跨级比较
+
+2、tag不相同，则直接删掉重建、不再深度比较
+
+3、tag和key，两者都相同，则认为是相同节点，不在深度比较
+
+**注意：普通的树diff比较时间复杂度为O(n*3)**
+
+##### 3.5、通过snabbdom学习dom以及diff算法（简单了解原理）
+
+### 4、模板编译
+
+**介绍**：1、首先模板不是html，他有指令、插值、js表达式、能实现循环判断，2、其次html是标签语言，只有js能实现循环判断，3、那么模板一定是转换成js代码，而转换的方式就是模板编译
+
+##### **4.1、前置知识:js的with语法**
+
+1、改变{}内自由变量的查找规则，当作obj属性来查找
+
+2、如果找不到匹配的obj属性，就会报错
+
+3、with要慎用，他打破了作用域规则，可读性变差
+
+例：
+
+```js
+// 关于js的with语法
+// with语法里面的自由变量可以通过with后面的obj属性查找
+const obj = { a: 1, b: 2 }
+with(obj) {
+    console.log(a) // 1
+    console.log(b) // 2
+    console.log(c) // 报错
+}
+
+console.log(obj.a) // 1
+console.log(obj.b) // 1
+console.log(obj.c) // 报错
+```
+
+##### 4.2、vue template complier 将模板编译成render函数
+
+1.、这个complier模板编译为render函数，执行render函数返回vnode
+
+2、基于vnode在执行patch和diff
+
+3、使用vue-cli是是基于vue-loader编译成render，会在开发环境编译模板
+
+**注意：整个流程就是从template模板编译到render函数，通过render函数生成vnode，在通过vnode中发生渲染和更新**
+
+### 5、组件渲染过程
+
+##### 5.1、初次渲染过程
+
+答：1、解析模板为render函数（vue-cli中在开发环境已经完成，vue-loader）
+
+​		2、触发响应式，监听data属性getter和setter
+
+​		3、执行render函数，生成vnode
+
+​		4、patch（element，vnode）将element和vnode关联显示视图
+
+##### 5.2、更新过程
+
+答：1、修改data，触发setter（此前在getter中已被监听到了）
+
+​		2、重新执行render函数，生成newVode
+
+​		3、更新节点 patch（vnode，newVnode）
+
+##### 5.3、异步渲染
+
+答：1、nextTick是等待DOM更新渲染后再次执行
+
+​		2、会去收集data的修改，一次性更新视图
+
+​		3、这样会减少DOM的操作次数，提高性能
+
+### 6、前端路由
+
+##### 6.1.前端hash模式特点：
+
+1、hash变化会触发网页跳转，即浏览器的前进后退
+
+2、hash变化不会刷新页面，spa的特点
+
+3、hash永远不会提交到server
+
+4、window.onhashchange方式监听hash变化 
+
+##### 6.2.H5 history模式特点：
+
+1.用url规范的路由，同样也是跳转时页面不会刷新
+
+2.history.pushState和window.onpopstate监听变化
+
+3、需要server端支持
+
+# Vue-router
+
+1、路由模式(hash、history)
+
+1.1、hash默认（默认）如：http://localhost:8800/#/user/10
+
+1.2、history模式如：http://localhost:8800/user/10
+
+后者需要server支持，无特殊需求选择前者
+
+2、路由配置（动态路由、懒加载）如：
+
+```js
+const User = {
+	template:'<div>{{$route.params.id}}</div>'
+}
+const router = new VueRouter({
+	routes:[
+	//配置动态参数 可以命中/user/10 /user/20等
+		{path:'/user/:id',component:User}
+    // 路由懒加载
+        {
+        	path:'/user/:id',
+        	components:()=>import('../components/user')
+        }
+	]
+})
+```
+
+
+
+# Vuex 
+
+1、基本概念
+
+2、用于Vue
+
+2.1、dispatch
+
+2.2、commit
+
+2.3、mapState、mapGetter、mapActions、mapMutations

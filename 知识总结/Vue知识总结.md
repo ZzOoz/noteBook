@@ -1271,6 +1271,8 @@ console.log(obj.c) // 报错
 
 ​		3、更新节点 patch（vnode，newVnode）
 
+总结： *Vue.js* 是如何在我们修改 `data` 中的数据后修改视图了。简单回顾一下，这里面其实就是一个“`setter -> Dep -> Watcher -> 生成render函数产生vnode-> patch -> 视图`”的过程。
+
 ##### 5.3、异步渲染
 
 答：1、nextTick是等待DOM更新渲染后再次执行
@@ -1301,7 +1303,7 @@ console.log(obj.c) // 报错
 
 # Vue-router
 
-1、路由模式(hash、history)
+##### 1、路由模式(hash、history)
 
 1.1、hash默认（默认）如：http://localhost:8800/#/user/10
 
@@ -1309,7 +1311,7 @@ console.log(obj.c) // 报错
 
 后者需要server支持，无特殊需求选择前者
 
-2、路由配置（动态路由、懒加载）如：
+##### 2、路由配置（动态路由、懒加载）如：
 
 ```js
 const User = {
@@ -1341,3 +1343,127 @@ const router = new VueRouter({
 2.2、commit
 
 2.3、mapState、mapGetter、mapActions、mapMutations
+
+
+
+# 面试题
+
+以下是一些面试常问的题目，在上面可能有答案，只不过统一整理以下
+
+### 1、为什么要在v-for中使用key？
+
+**答：**在v-for循环中使用key（不要使用index和random），原因是因为diff算法是通过tag和key来判断，是否是同一个node，这样做会减少渲染不必要的node的次数，提升渲染性能
+
+### 2、描述Vue父子组件的执行顺序？
+
+**答：**线上
+
+### 3、Vue组件间的通信（知识点中已详细描述）
+
+https://www.cnblogs.com/yuliangbin/p/9348156.html
+
+https://www.cnblogs.com/zmyxixihaha/p/10714217.html
+
+### 4、描述组件渲染和更新过程
+
+### 5、v-model实现双向绑定的原理
+
+**答：**实际上v-model只不过是v-bind和v-on的语法糖，v-bind通过绑定value值，而v-on是通过监听input事件（value=$event.target.value）来触发value的改变，而value的改变也会是的input事件里面的value值发生改变，然后通过data的更新触发render函数
+
+### 6、组件data为何是一个函数？
+
+**答：**每一个组件都是一个vue实例，如果使用对象的方式 给组件内data赋值，那么当复用组件改变data时会影响所有的组件，如果使用函数的形式那么就是给每一个组件的data设为一个私有变量，不会相互影响
+
+### 7、如何将组件所有props传递给子组件
+
+**答：**使用$props
+
+```js
+<User v-bind="$props">
+```
+
+### 8、自己实现一个v-model
+
+```js
+<template>
+  <div>
+      <!-- 自己实现一个自定义v-mode -->
+      <input type="text" 
+             :value="content"
+             @input="this.$emit('change',$event.target.value)"/>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'HelloWorld',
+  model:{
+      props:['content'],
+      event:'change'
+  },
+  props:{
+      content:String
+  }
+}
+</script>
+```
+
+
+
+### 9、何时使用keep-alive？
+
+答：1、缓存组件，不需要重复渲染
+
+​		2、如多个静态tab页切换
+
+​		3、优化性能
+
+
+
+### 10、何时需要使用beforeDestory？
+
+答：1、解绑自定义事件event.$off
+
+​		2、清除定时器
+
+​		3、解绑自定义dom事件（addListener），如window scroll等
+
+
+
+### 11、vuex中action和mutation的区别？
+
+答：1、action处理异步，mutation不能
+
+​		2、mutation做原子操作
+
+​		3、action可以整合多个mutation
+
+
+
+### 12、vue中如何监听数组的响应式变化？
+
+答：1、Object.defineProperty不能监听数组的变化
+
+​		2、需要重新定义原型，重写push、pop等函数（上面知识点有详细）
+
+​		3、proxy可以原生支持监听数组变化
+
+
+
+### 13、Vue中常见性能优化方式
+
+1、合理使用v-show和v-if
+
+2、合理使用computed
+
+3、v-for中使用key（优化渲染）
+
+4、自定义事件、dom事件及时销毁
+
+5、合理使用异步组件和keep-alive
+
+6、data层级不要太深（使用definePropertype需要递归到最底部监听，消耗性能）
+
+7、webpack层面的优化
+
+8、图片懒加载等

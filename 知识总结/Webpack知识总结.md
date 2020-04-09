@@ -81,6 +81,8 @@ module.exports = {
 
 2、chunkFilencame和filename的区别？
 
+参考：https://www.jianshu.com/p/9ba10d6399be
+
 答：filename是entry对象中打包出来后的文件名，
 
 ​       而chunkFilename就是未被列在entry中，但有些场景需要被打包出来的文件命名配置。比如按需加载（异步）模块的时候，这样的文件是没有被列在entry中的使用CommonJS的方式异步加载模块
@@ -637,7 +639,9 @@ scripts:{
 }
 ```
 
+2、prefetch、preloading
 
+参考：https://www.jianshu.com/p/235ad6bc5a8e
 
 # 面试题
 

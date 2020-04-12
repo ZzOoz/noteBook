@@ -1,5 +1,7 @@
 # Webpack知识总结
 
+书籍：http://www.xbhub.com/wiki/webpack/
+
 知识总结：
 
 **es6引入导出模块：import  export default**

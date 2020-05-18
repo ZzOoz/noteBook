@@ -244,7 +244,7 @@ export default {
 ```js
 <template>
   <div>
- 	  // 与demo2(222,$event) 一样
+      <!-- 与第二种一样 -->
       <div @click="demo(222)">ggogg1</div>
       <!-- 想要及传入参数又有event对象可以在括号里面加上$event就可以了，当然也可以不传，绑定window.event-->
       <div @click="demo2(222,$event)">ggogg2</div>
@@ -257,7 +257,7 @@ export default {
 
 <script>
 export default {
-  name: 'HelloWorld',
+  name: 'EventDemo',
   methods:{
     demo(val){
         console.log(window.event === event) // true
@@ -273,6 +273,12 @@ export default {
         console.log(window.event === event) // false
         console.log(typeof event)  // undefined
     },
+    // 但如果是下面这种的
+    // demo3(){
+    //     console.log(event) // 具体信息
+    //     console.log(window.event === event) // false
+    //     console.log(typeof event)  // undefined
+    // },
     demo4(event){
         console.log(event) // 具体信息
         console.log(window.event === event) // true
@@ -285,7 +291,6 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 </style>
-
 ```
 
 ##### **6.2.事件修饰符**
@@ -439,10 +444,6 @@ export default {
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped lang="scss">
-</style>
-
 ```
 
 
@@ -473,11 +474,6 @@ export default {
   } 
 }
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped lang="scss">
-</style>
-
 ```
 
 引用bro1和bro2组件的主组件**(点击bro2的事件会触发bro1的监听成功将title值变成bro2传过去的值)**
@@ -502,11 +498,6 @@ export default {
   }
 }
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped lang="scss">
-</style>
-
 ```
 
 **2.3、跨级组件通信（$attr和$listener）**
@@ -644,7 +635,55 @@ export default {
 
 2.4.1、$provide和$inject需要成对使用，同时在后代组件inject注入后改变祖先组件的属性后是不会响应式改变值的
 
-2.4.2、
+Father.vue
+
+```js
+<template>
+  <div>
+      <Chlid />
+  </div>
+</template>
+
+<script>
+import Chlid from './Child.vue'
+export default {
+  name: "",
+  provide(){
+      return {
+          for:'demo'
+      }
+  },
+  components:{
+    Chlid
+  },
+}
+</script>
+
+```
+
+Chlid.vue
+
+```js
+<template>
+  <div>
+      <div>{{demo}}</div>
+  </div>
+</template>
+
+<script>
+export default {
+  name: "",
+  inject:['for'],
+  data(){
+    return{
+        demo:this.for
+    }
+  }
+}
+</script>
+```
+
+
 
 # C、Vue高级特性
 
@@ -695,7 +734,6 @@ export default {
           // 要用nextTick方法等到dom更新在计算
           // 此时就可以拿到最新的dom,无论多少次更新data，vue的重新渲染都只会有一次
           this.$nextTick(()=>{
-
               let ulList = this.$refs.ulList.childNodes.length
               console.log(ulList,'长度')
           })
@@ -704,10 +742,6 @@ export default {
   }
 }
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped lang="scss">
-</style>
 
 ```
 
@@ -769,23 +803,11 @@ export default {
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped lang="scss">
-</style>
-
 ```
 
 
 
 子组件
-
-
-
-
-
-
-
-
 
 
 
@@ -902,15 +924,13 @@ export default {
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped lang="scss">
-</style>
-
 ```
 
 ##### 4.2、异步组件
 
 参考：https://segmentfault.com/a/1190000012138052（建议看）
+
+参考：https://www.w3cplus.com/vue/async-vuejs-components.html
 
 **介绍**：当需要加载一个比较大的组件或者说想要在使用时才加载组件时可以使用异步组件加载的方式
 
@@ -957,6 +977,8 @@ export default {
 
 ### 5、keep-alive
 
+参考：https://www.jianshu.com/p/4b55d312d297
+
 **介绍**：keep-alive是一种缓存组件的方式，可以对已有组件的状态保存（在切换到下一个组件的时候）
 
 **使用**：可以在例如tab组件切换的时候使用
@@ -966,6 +988,8 @@ export default {
 
 
 ### 6、mixin
+
+**参考：**https://www.jianshu.com/p/4b55d312d297
 
 **介绍**：多个组件有相同的逻辑，可以抽取出来，同时可以简化代码，在组件mixins选项中可以加入多个mixin
 
@@ -1332,6 +1356,11 @@ const router = new VueRouter({
 
 
 
+##### 3、route和router的区别？
+
+route：代表当前路由信息对象，可以获取到当前路由的信息参数
+router：代表路由实例的对象，包含了路由的跳转方法，钩子函数等
+
 # Vuex 
 
 1、基本概念
@@ -1358,11 +1387,11 @@ const router = new VueRouter({
 
 **答：**线上
 
-### 3、Vue组件间的通信（知识点中已详细描述）
-
 https://www.cnblogs.com/yuliangbin/p/9348156.html
 
 https://www.cnblogs.com/zmyxixihaha/p/10714217.html
+
+### 3、Vue组件间的通信（知识点中已详细描述）
 
 ### 4、描述组件渲染和更新过程
 
@@ -1373,6 +1402,28 @@ https://www.cnblogs.com/zmyxixihaha/p/10714217.html
 ### 6、组件data为何是一个函数？
 
 **答：**每一个组件都是一个vue实例，如果使用对象的方式 给组件内data赋值，那么当复用组件改变data时会影响所有的组件，如果使用函数的形式那么就是给每一个组件的data设为一个私有变量，不会相互影响
+
+```
+// data
+data() {
+  return {
+	message: "子组件",
+	childName:this.name
+  }
+}
+
+// new Vue
+new Vue({
+  el: '#app',
+  router,
+  template: '<App/>',
+  components: {App}
+})
+
+复制代码
+```
+
+因为组件是用来复用的，且 JS 里对象是引用关系，如果组件中 data 是一个对象，那么这样作用域没有隔离，子组件中的 data 属性值会相互影响，如果组件中 data 选项是一个函数，那么每个实例可以维护一份被返回对象的独立的拷贝，组件实例之间的 data 属性值不会互相影响；而 new Vue 的实例，是不会被复用的，因此不存在引用对象的问题
 
 ### 7、如何将组件所有props传递给子组件
 
@@ -1410,7 +1461,11 @@ export default {
 
 
 
-### 9、何时使用keep-alive？
+### 9、何时使用keep-alive？谈谈你对keep-alive的理解？
+
+https://www.jianshu.com/p/4b55d312d297
+
+**注意：exclude的优先级高于include	**
 
 答：1、缓存组件，不需要重复渲染
 
@@ -1467,3 +1522,373 @@ export default {
 7、webpack层面的优化
 
 8、图片懒加载等
+
+
+
+
+
+### 14、直接给一个数组项赋值，Vue 能检测到变化吗？
+
+参考：https://www.jianshu.com/p/e6e8c45e7fd6
+
+由于 JavaScript 的限制，Vue 不能检测到以下数组的变动：
+
+- 当你利用索引直接设置一个数组项时，例如：`vm.items[indexOfItem] = newValue`
+- 当你修改数组的长度时，例如：`vm.items.length = newLength`
+
+为了解决第一个问题，Vue 提供了以下操作方法：
+
+```js
+// Vue.set
+Vue.set(vm.items, indexOfItem, newValue)
+// vm.$set，Vue.set的一个别名
+vm.$set(vm.items, indexOfItem, newValue)
+// Array.prototype.splice
+vm.items.splice(indexOfItem, 1, newValue)
+```
+
+为了解决第二个问题，Vue 提供了以下操作方法：
+
+```js
+// Array.prototype.splice
+vm.items.splice(newLength)
+```
+
+
+
+### 15、父组件可以监听到子组件的生命周期吗？
+
+比如有父组件 Parent 和子组件 Child，如果父组件监听到子组件挂载 mounted 就做一些逻辑处理，可以通过以下写法实现：
+
+```js
+// Parent.vue
+// 通过监听子组件的生命周期在doSometing函数中做某些事情
+<Child @mounted="doSomething"/>
+    
+// Child.vue
+mounted() {
+  this.$emit("mounted");
+}
+```
+
+以上需要手动通过 $emit 触发父组件的事件，更简单的方式可以在父组件引用子组件时通过 @hook 来监听即可，如下所示：
+
+```js
+//  Parent.vue
+<Child @hook:mounted="doSomething" ></Child>
+
+doSomething() {
+   console.log('父组件监听到 mounted 钩子函数 ...');
+},
+    
+//  Child.vue
+mounted(){
+   console.log('子组件触发 mounted 钩子函数 ...');
+},    
+    
+// 以上输出顺序为：
+// 子组件触发 mounted 钩子函数 ...
+// 父组件监听到 mounted 钩子函数 ...     
+```
+
+当然 @hook 方法不仅仅是可以监听 mounted，其它的生命周期事件，例如：created，updated 等都可以监听。
+
+
+
+
+
+### 16、Vue 是如何实现数据双向绑定的？
+
+Vue 数据双向绑定主要是指：数据变化更新视图，视图变化更新数据，如下图所示：
+
+
+
+![1.png](https://user-gold-cdn.xitu.io/2019/8/19/16ca75871f2e5f80?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+
+即：
+
+- 输入框内容变化时，Data 中的数据同步变化。即 View => Data 的变化。
+- Data 中的数据变化时，文本节点的内容同步变化。即 Data => View 的变化。
+
+其中，View 变化更新 Data ，可以通过事件监听的方式来实现，所以 Vue 的数据双向绑定的工作主要是如何根据 Data 变化更新 View。
+
+Vue 主要通过以下 4 个步骤来实现数据双向绑定的：
+
+实现一个监听器 Observer：对数据对象进行遍历，包括子属性对象的属性，利用 Object.defineProperty() 对属性都加上 setter 和 getter。这样的话，给这个对象的某个值赋值，就会触发 setter，那么就能监听到了数据变化。
+
+实现一个解析器 Compile：解析 Vue 模板指令，将模板中的变量都替换成数据，然后初始化渲染页面视图，并将每个指令对应的节点绑定更新函数，添加监听数据的订阅者，一旦数据有变动，收到通知，调用更新函数进行数据更新。
+
+实现一个订阅者 Watcher：Watcher 订阅者是 Observer 和 Compile 之间通信的桥梁 ，主要的任务是订阅 Observer 中的属性值变化的消息，当收到属性值变化的消息时，触发解析器 Compile 中对应的更新函数。
+
+实现一个订阅器 Dep：订阅器采用 发布-订阅 设计模式，用来收集订阅者 Watcher，对监听器 Observer 和 订阅者 Watcher 进行统一管理。
+
+以上四个步骤的流程图表示如下，如果有同学理解不大清晰的，可以查看文章[《0 到 1 掌握：Vue 核心之数据双向绑定》](https://juejin.im/post/5d421bcf6fb9a06af23853f1)，有进行详细的讲解、以及代码 demo 示例。
+
+
+
+![1.png](https://user-gold-cdn.xitu.io/2019/8/19/16ca75871f729d89?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+
+
+
+### 17、 vue为什么要求组件模板只能有一个根元素
+
+我们在使用单文件组件时，一般这样写：
+
+<template>
+<div class='component'></div>
+</template>
+为什么template下必须有一个根元素？
+
+首先看一看template这个标签，这个标签是html5的新标签，有三个特性：
+
+隐藏性：不会显示在页面中
+任意性：可以写在页面的任意地方
+无效性： 没有一个根元素包裹，任何HTML内容都是无效的
+每一个.Vue的单文件组件本质就是一个vue实例，既然是一个vue实例，它就要有一个入口，如果有多个div，就不无法指定这个vue实例的根入口。
+
+就像一个HTML文档只能有一个根元素一样，多个根元素必将导致无法构成一颗树，所以解释了 <template></template>只有一个<div>根元素。
+
+
+
+### 18、在.vue文件中style是必须的吗？那script是必须的吗？为什么？
+
+```js
+都不是必须的
+如果是普通组件那么只能是一个静态html
+如果是函数式组件， 那么可以直接使用props等函数式组件属性
+```
+
+### 19、vue-router如何响应路由参数的变化？
+
+问题：为什么要响应参数变化？
+
+- 切换路由，路由参数发生了变化，但是页面数据并未及时更新，需要强制刷新后才会变化。
+- 不同路由渲染相同的组件时（组件复用比销毁重新创建效率要高），在切换路由后，当前组件下的生命周期函数不会再被调用。
+
+解决方案：
+
+1. 使用 watch 监听
+
+```js
+watch: {
+    $route(to, from){
+        if(to != from) {
+            console.log("监听到路由变化，做出相应的处理");
+        }
+    }
+}
+```
+
+1. 向 router-view 组件中添加 key
+
+   ```js
+   <router-view :key="$route.fullPath"></router-view>
+   ```
+
+   $route.fullPath 是完成后解析的URL，包含其查询参数信息和hash完整路径
+
+
+
+### 20、如何获取路由参数？
+
+如果使用`query`方式传入的参数使用`this.$route.query` 接收
+如果使用`params`方式传入的参数使用`this.$router.params`接收
+
+
+
+### 21、在vue组件中怎么获取到当前的路由信息？
+
+如果是template中获取直接 `$route` 即可
+如果是script中获取 `this.$route`
+可以 `console.log(this.$route)` 查看其详细信息
+
+
+
+### 22、怎么样实现动态加载路由？
+
+router.addRoutes()方法
+
+
+
+### 23、vue-router是用来做什么的？它有哪些组件？
+
+vue-router路由，通俗来讲主要是来实现页面的跳转，通过设置不同的path，向服务器发送的不同的请求，获取不同的资源。
+主要组件：router-view、router-link
+
+**router-view 是显示当前路由地址对应的内容**
+
+**router-link 是跳转的一种方式，相当于a标签 可以通过to来跳转指定页面，同时也可以用tag属性指定对应的标签，使用key来响应路由参数变化**
+
+
+
+### 24、你有写过vuex中store的插件吗？在什么场景下使用？
+
+```js
+const MyPlugin = store => {
+	store.subscribe((mutation,state)=>{
+		// 每次mutation执行后调用这个钩子
+	})
+}
+```
+
+使用场景：当多个操作都会触发某一个mutation时可以在这个逻辑里面新增一些方法
+
+
+
+### 25、Vuex中的action和mutation的区别？
+
+mutations可以直接修改state，但只能包含同步操作，同时，只能通过提交commit调用(尽量通过Action或mapMutation调用而非直接在组件中通过this.$store.commit()提交)
+actions是用来触发mutations的，它无法直接改变state，它可以包含异步操作，它只能通过store.dispatch触发
+
+
+
+### 26、不使用vuex会带来什么问题？
+
+1.传参数时对于多层嵌套的组件将会非常繁琐，对于兄弟组件更是无法传递（只能使用EventBus自定义事件，但是大型项目就很难了）
+2.当不同视图的行为需要去修改数据时，无法追踪到数据的变更方向，导致无法维护代码
+
+
+
+### 27、请求数据写在组件内还是vuex的action中？
+
+具体情况具体分析，如果需要将数据保存在state中以及为了复用数据的话在acion中，如果不是这种情况放在组件内请求
+
+
+
+### 28、Vuex如何监听数据的变化？
+
+参考：https://segmentfault.com/q/1010000012405776z
+
+
+
+### 29、vue单页面应用刷新网页后vuex的state数据丢失的解决方案
+
+参考：https://blog.csdn.net/guzhao593/article/details/81435342
+
+
+
+### 30、Proxy与Object.defineProperty的优劣对比?
+
+Proxy的优势如下:
+
+- Proxy可以直接监听对象而非属性
+- Proxy可以直接监听数组的变化
+- Proxy有多达13种拦截方法,不限于apply、ownKeys、deleteProperty、has等等是`Object.defineProperty`不具备的
+- Proxy返回的是一个新对象,我们可以只操作新的对象达到目的,而`Object.defineProperty`只能遍历对象属性直接修改
+- Proxy作为新标准将受到浏览器厂商重点持续的性能优化，也就是传说中的新标准的性能红利
+
+Object.defineProperty的优势如下:
+
+- 兼容性好,支持IE9
+
+
+
+### 31、什么是虚拟DOM?实现？
+
+- 虚拟DOM本质上是JavaScript对象,是对真实DOM的抽象
+- 状态变更时，记录新树和旧树的差异
+- 最后把差异更新到真正的dom中
+
+
+
+### 32、vue-router中实现页面跳转的方式？谈谈你对router-link的了解？
+
+**router-link是vue-router的一个插件，是进行页面跳转的，类似于a标签，但是可以通过tag标签对默认标签进行渲染，通过to来跳转**
+
+第一种是通过router-link的方式进行跳转
+
+```js
+// 字符串
+<router-link to="apple"> to apple</router-link>
+// 对象
+<router-link :to="{path:'apple'}"> to apple</router-link>
+// 命名路由
+<router-link :to="{name: 'applename'}"> to apple</router-link>
+//直接路由带查询参数query，地址栏变成 /apple?color=red
+<router-link :to="{path: 'apple', query: {color: 'red' }}"> to apple</router-link>
+// 命名路由带查询参数query，地址栏变成/apple?color=red
+<router-link :to="{name: 'applename', query: {color: 'red' }}"> to apple</router-link>
+//直接路由带路由参数params，params 不生效，如果提供了 path，params 会被忽略
+<router-link :to="{path: 'apple', params: { color: 'red' }}"> to apple</router-link>
+// 命名路由带路由参数params，地址栏是/apple/red
+<router-link :to="{name: 'applename', params: { color: 'red' }}"> to apple</router-link>
+```
+
+第二种是通过编程式导航使用this.$router.push（replace、go）等
+
+```js
+// 字符串
+router.push('apple')
+// 对象
+router.push({path:'apple'})
+// 命名路由
+router.push({name: 'applename'})
+//直接路由带查询参数query，地址栏变成 /apple?color=red
+router.push({path: 'apple', query: {color: 'red' }})
+// 命名路由带查询参数query，地址栏变成/apple?color=red
+router.push({name: 'applename', query: {color: 'red' }})
+//直接路由带路由参数params，params 不生效，如果提供了 path，params 会被忽略
+router.push({path:'applename', params:{ color: 'red' }})
+// 命名路由带路由参数params，地址栏是/apple/red
+router.push({name:'applename', params:{ color: 'red' }})
+```
+
+
+
+
+
+33、vue-router如何配置重定向和404页面？
+
+**重定向**
+
+重定向也是通过 `routes` 配置来完成，下面例子是从 `/a` 重定向到 `/b`：
+
+```js
+const router = new VueRouter({
+  routes: [
+    { path: '/a', redirect: '/b' }
+  ]
+})
+```
+
+重定向的目标也可以是一个命名的路由：
+
+```js
+const router = new VueRouter({
+  routes: [
+    { path: '/a', redirect: { name: 'foo' }}
+  ]
+})
+```
+
+甚至是一个方法，动态返回重定向目标：
+
+```js
+const router = new VueRouter({
+  routes: [
+    { path: '/a', redirect: to => {
+      // 方法接收 目标路由 作为参数
+      // return 重定向的 字符串路径/路径对象
+    }}
+  ]
+})
+```
+
+
+
+配置404页面
+
+```js
+// 在配置路由的最后添加 最后最为匹配
+{
+	path:*,
+	component:NotFound
+	name:'404'
+}
+```
+
+
+
+### 33、vuex中的action中的context对象有什么？
+
+**里面包含了state、commit、getter、dispatch、rootState、rootGetters(后面两个是模块的时候)属性**

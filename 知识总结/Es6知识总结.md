@@ -92,7 +92,7 @@ set.size // 2
 
 ## 1、iterator（遍历器）
 
-**注意！！：首先`Symbol.iterator`方法返回一个遍历器对象（这个对象中包含了next方法、throw方法、return方法等），然后通过调用这个next方法才会返回一个对象（这个对象包含了value和done属性），这是需要注意的**
+**注意！！：首先`Symbol.iterator`方法返回一个对象（这个对象中包含了next方法、throw方法、return方法等），然后通过调用这个next方法才会返回一个遍历器对象（这个对象包含了value和done属性），这是需要注意的**
 
 **介绍：**Iterator是这样一种机制。它是一种接口，为各种不同的数据结构提供统一的访问机制。任何数据结构只要部署 Iterator 接口，就可以完成遍历操作（即依次处理该数据结构的所有成员）
 
@@ -585,3 +585,154 @@ for (var n of fibonacci) {
 ```
 
 上面的例子，会输出斐波纳契数列小于等于 1000 的项。如果当前项大于 1000，就会使用`break`语句跳出`for...of`循环。
+
+
+
+### 总结：
+
+1、调用iterator的一些场景？
+
+2、可以调用for...of循环的一些数据结构？
+
+3、for...of和其他遍历语法的比较？
+
+# 扩展运算符的应用？
+
+### 1、复制数组
+
+```js
+/**
+ * 复制数组
+ */
+const a = [1,2,3]
+const [...a2] = a
+const a3 = [...a]
+
+a2[0] = 2
+a3[0] = 4
+console.log(a)
+console.log(a2)
+console.log(a3)
+```
+
+
+
+### 2、合并数组
+
+扩展运算符提供了数组合并的新写法。
+
+```javascript
+const arr1 = ['a', 'b'];
+const arr2 = ['c'];
+const arr3 = ['d', 'e'];
+
+// ES5 的合并数组
+arr1.concat(arr2, arr3);
+// [ 'a', 'b', 'c', 'd', 'e' ]
+
+// ES6 的合并数组
+[...arr1, ...arr2, ...arr3]
+// [ 'a', 'b', 'c', 'd', 'e' ]
+```
+
+不过，这两种方法都是浅拷贝，使用的时候需要注意。
+
+```javascript
+const a1 = [{ foo: 1 }];
+const a2 = [{ bar: 2 }];
+
+const a3 = a1.concat(a2);
+const a4 = [...a1, ...a2];
+
+a3[0] === a1[0] // true
+a4[0] === a1[0] // true
+```
+
+上面代码中，`a3`和`a4`是用两种不同方法合并而成的新数组，但是它们的成员都是对原数组成员的引用，这就是浅拷贝。如果修改了引用指向的值，会同步反映到新数组。
+
+### 3、与解构赋值结合
+
+```js
+const [frist,...res] = [1,2,3]
+console.log(frist) // 1
+console.log(...res) //2，3
+```
+
+如果将扩展运算符用于数组赋值，只能放在参数的最后一位，否则会报错。
+
+```javascript
+const [...butLast, last] = [1, 2, 3, 4, 5];
+// 报错
+
+const [first, ...middle, last] = [1, 2, 3, 4, 5];
+// 报错
+```
+
+### 4、实现了 Iterator 接口的对象
+
+任何定义了遍历器（Iterator）接口的对象（参阅 Iterator 一章），都可以用扩展运算符转为真正的数组。
+
+```javascript
+let nodeList = document.querySelectorAll('div');
+let array = [...nodeList];
+```
+
+上面代码中，`querySelectorAll`方法返回的是一个`NodeList`对象。它不是数组，而是一个类似数组的对象。这时，扩展运算符可以将其转为真正的数组，原因就在于`NodeList`对象实现了 Iterator 。
+
+```javascript
+Number.prototype[Symbol.iterator] = function*() {
+  let i = 0;
+  let num = this.valueOf();
+  while (i < num) {
+    yield i++;
+  }
+}
+
+console.log([...5]) // [0, 1, 2, 3, 4]
+```
+
+上面代码中，先定义了`Number`对象的遍历器接口，扩展运算符将`5`自动转成`Number`实例以后，就会调用这个接口，就会返回自定义的结果。
+
+对于那些没有部署 Iterator 接口的类似数组的对象，扩展运算符就无法将其转为真正的数组。
+
+```javascript
+let arrayLike = {
+  '0': 'a',
+  '1': 'b',
+  '2': 'c',
+  length: 3
+};
+
+// TypeError: Cannot spread non-iterable object.
+let arr = [...arrayLike];
+```
+
+上面代码中，`arrayLike`是一个类似数组的对象，但是没有部署 Iterator 接口，扩展运算符就会报错。这时，可以改为使用`Array.from`方法将`arrayLike`转为真正的数组。
+
+
+
+
+
+数组新增的方法
+
+1、Array.from
+
+2、Array.of
+
+3、Array.find()和Array.findIndex  接受一个回调函数 回调函数的参数有（value,index,arr）、find方法返回第一个找到的值 findIndex返回第一个找到的值的索引
+
+4、Array.fill 填充数组
+
+5、Array.includes() 数组中是否存在参数中的值 返回布尔值
+
+
+
+
+
+
+
+# Reflect
+
+总结：
+
+1、Reflect的用处是什么？

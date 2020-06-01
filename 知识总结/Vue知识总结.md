@@ -373,9 +373,7 @@ export default {
 
 ​	7.2.1、lazy:使用了这个修饰符将会从“input事件”变成change事件进行同步
 
-​	7.2.2、number
-
-首先谁明这个number并不是限制用户的输入,而是将用户输入的数据尝试绑定为 js 中的 number 类型
+​	7.2.2、number：首先谁明这个number并不是限制用户的输入,而是将用户输入的数据尝试绑定为 js 中的 number 类型
 
 举个例子，如果用户输入`300`，data 中绑定的其实是`'300'`(string)，添加 number 指令后可以得到 `300`(number)的绑定结果。
 而如果用户输入的不是数字，这个指令并不会产生任何效果。
@@ -1892,3 +1890,11 @@ const router = new VueRouter({
 ### 33、vuex中的action中的context对象有什么？
 
 **里面包含了state、commit、getter、dispatch、rootState、rootGetters(后面两个是模块的时候)属性**
+
+
+
+### 34、vuex中的getter包含哪些参数？mutation呢？
+
+getter中包含两个参数，第一个是state、第二个是getters（getter对象）、如果有模块命名空间就新增rootState和rootGetter
+
+mutaion有state和payload两个

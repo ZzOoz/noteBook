@@ -105,25 +105,13 @@ filename 是对应entry入口的文件
 
 chunkFilename 不在`output.entry`中的文件，但是需要单独打包的文件名 设置使用`require.ensure`或者`import`异步加载模块打包后的名称
 
-比如：
-
-```
-
-```
-
-
-
 # Loader知识
 
 ## 1、什么是loader？
 
 答：loader是对特定语言或者文件打包的特定的方案，按照哪种方式打包可以让浏览器识别并且运行
 
-## 2、url-loader和file-loader的区别？
-
-答：1、url-loader依赖file-loader
-       2、当使用url-loader加载图片，图片大小小于上限值，则将图片转base64字符串，；否则使用file-loader加载图片，      都是为了提高浏览器加载图片速度。
-       3、使用url-loader加载图片比file-loader更优秀
+​	
 
 6、css-loader和style-loader的功能？
 
@@ -206,7 +194,7 @@ module.exports = {
 1、安装babel-loader和 @babel/core
 
 ```js
-npm install --save-dev babel-loader @babel/core
+npm install --save-dev babel-loader @babel/core @babel/preset-env @babel/polyfill 
 ```
 
 **babel-loader的作用**：这个是babel和webpack连接的桥梁，当遇到js文件时需要使用loader处理
@@ -305,7 +293,7 @@ plugins: [
             filename:"index.html",
         	chunks:['index'] // 只引用index.js文件
         }),
-            new HtmlWebpackPlugin({
+        new HtmlWebpackPlugin({
             template: "./src/other.html",
             filename:"other.html",
         	chunks:['other'] // 只引用other.js文件
@@ -381,7 +369,7 @@ plugins:[
   },
 ```
 
-## 2、使用devServer配置(这样做的好处是对于服务器来说，可以发送ajax请求或者做其他处理，对于第1种用watch的方式是不可以的)
+## 	2、使用devServer配置(这样做的好处是对于服务器来说，可以发送ajax请求或者做其他处理，对于第1种用watch的方式是不可以的)
 
 ```js
 // 1、需要先安装webpack-dev-server
@@ -393,8 +381,6 @@ plugins:[
         
 // 3、运行脚本npm run server 脚本配置 "server":"webpack-dev-server"
 ```
-
-
 
 # treeShaking（按需引入模块功能）
 
@@ -414,7 +400,7 @@ webpack.config.js文件下
     },
 ```
 
-**注意：**如果遇到一些你不想去使用treeShaking（或者说仅仅是引入而不用去使用的比如一些css文件或者babel/pofill）可以在package.json文件下设置
+**注意：**如果遇到一些你不想去使用treeShaking（或者说仅仅是引入而不用去使用的比如一些css文件或者babel/pofill）可以在package.json文件下
 
 ```js
 {	
@@ -549,7 +535,7 @@ module.exports = merge(commonConfig, devConfig)
 
 webpack.prod.js
 
-```
+```js
 // 生产环境下的配置
 const merge = require('webpack-merge')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
@@ -615,6 +601,15 @@ optimization：{
 1.3、事实上，无论同步还是异步代码分割都是基于SplitChunksPlugin这个插件实现的，而这个插件仅仅是默认异步代码的分割
 
 ## 2、SplitChunksPlugin配置参数详解
+
+```js
+// 直接引入
+import _ form 'lodash'
+// 异步引入
+function go(){
+	return import('lodash')
+}
+```
 
 ```js
 splitChunks: {
@@ -744,7 +739,7 @@ scripts:{
     output: {
         filename: "[name]-[contenthash].js",
         chunkFilename: "[name]-[contenthash].chunks.js"
-    }
+  }
 ```
 
 
@@ -1107,7 +1102,7 @@ scripts:{
 
 ​		另外可以有一个高效统一的开发环境、统一的构建流程和产出标准
 
-#### 2、module chunk bundle分别是什么意chunks思，有何区别？
+#### 2、module chunk bundle分别是什么意思，有何区别？
 
 答：module是指任意的文件模块，等价于commonjs中的模块
 
@@ -1200,7 +1195,7 @@ module.exports = {
 
 **ParallelUglifyPlugin（可用于生产环境）**：（开启多个子进程，把对多个文件的压缩工作分配给多个子进程去完成，每个子进程其实还是通过 UglifyJS 去压缩代码，但是变成了并行执行）
 
-```
+```js
 const path = require('path');
 const DefinePlugin = require('webpack/lib/DefinePlugin');
 const ParallelUglifyPlugin = require('webpack-parallel-uglify-plugin');

@@ -24,7 +24,6 @@ const catchError = (ctx,next){
 		if(isDev && !isHttpException){
             throw error
         }
-        // 如果是生产环境
         // 判断error是不是HttpException类型错误
         // 如果是则是已知错误 因为HttpException是自己定义的错误类
         // 抛出的错误 如在某一个api抛出ParameterException错误 就会被最外面的catchError捕捉
@@ -99,9 +98,48 @@ module.exports = catchError
 
      ##### 2.使用vscode调式和nodemon自动重启的综合应用
 
-     ​	vscoede
+     ​	步骤：1、Ctrl+Shift+D进入运行和调试界面，点击运行和调试新建.vscode文件夹里面有一个launch.json文件
 
-     ##### 3.初始化管理器和使用绝对路
+     ```js
+     {
+         // 使用 IntelliSense 了解相关属性。 
+         // 悬停以查看现有属性的描述。
+         // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+         "version": "0.2.0",
+         "configurations": [
+             {
+                 "type": "node",
+                 "request": "launch",
+                 "name": "启动程序",
+                 "skipFiles": [
+                     "<node_internals>/**"
+                 ],
+                 "program": "${workspaceFolder}\\index.js"
+             }
+         ]
+     }
+     ```
+     
+     ​		2、点击右下角的添加配置，添加nodemon配置，出现以下配置并保存
+     
+     ```js
+             {
+                 "type": "node",
+                 "request": "launch",
+                 "name": "nodemon",
+                 "runtimeExecutable": "nodemon",
+                 "program": "${workspaceFolder}/app.js",
+                 "restart": true,
+                 "console": "integratedTerminal",
+                 "internalConsoleOptions": "neverOpen",
+                 "skipFiles": [
+                     "<node_internals>/**"
+                 ]
+             },
+     ```
+     
+     ​		3、在所想要调试的代码点击红点，按F5开启调试，代码运行到所在的位置会自动调试并且每次修改代码都会保存并更新
+     
 
 
 
@@ -119,15 +157,13 @@ ctx.request.body
 
 
 
-
-
 ##### 编写一个koa Api的思路路径
 
 ​	1.首先要获取参数，然后进行参数校验
 
 ​	2.然后将获取的参数保存到数据库中去
 
-
+​	3、通过参数对数据库进行操作获取到数据返回
 
 ##### 3.中间件
 
@@ -288,6 +324,7 @@ Class Auth{
             // 从给定的请求中获取基本的身份验证凭据。 
             //解析Authorization标头，如果标头无效，则返回undefined，
             //否则返回具有name和pass属性的对象。
+            // 从ctx.req中获取到请求的token userToken是一个对象里面有name和pass属性
             let userToken = basicAuth(ctx.req)
             let errorMsg = 'token不合法'
 
@@ -311,7 +348,7 @@ Class Auth{
             }
            
             // 通过实例传参来比较权限级别
-            if(decode.scope <= this.level){
+            if(decodeToken.scope <= this.level){
                 errorMsg = '权限不足'
                 throw new global.errs.ForbiddenException(errorMsg)
             }
@@ -559,9 +596,7 @@ class TokenValidator extends LinValidator{
 
 ##### 8.微信生成openID过程
 
-​	由前端生成的code码传给服务端，然后服务端通过调用微信的服务，如果code码正确则会返回用户的openID
-
-
+​	由前端生成的code码传给服务端，然后携带code码传给自己的服务器，自己的服务器通过appId、appSecret、code码一并传到微信服务器，微信服务器传回sessionKey和openId给自己的服务器，自己的服务器通过将sessionKey和openId整合成自定义登录态（其中一种类型就是token），传给前端，前端携带到自己的storage中，每次请求都携带token在请求头，传来传去
 
 **9.微信小程序中使用npm包**
 

@@ -310,3 +310,110 @@ setPicSize(content){
 			},
 ```
 
+
+
+## 5.3、实现拍照发送图片功能
+
+步骤：
+
+1、点击chooseImage方法触发getImage方法
+
+2、getImage方法中调用uni.chooseImage方法选择图片，其中的sourceType可以选择“alumb”或者“camera”，在chooseImage的成功回调中遍历选择的图片使用uni.getImageInfo获取图片信息，最后在getImageInfo的成功回调中调用sendMsg(msg)方法
+
+3、sendMsg也和之前一样获取时间、id号、最后形成msg的固定格式，调用screenMsg方法
+
+4、screenMsg方法通过switch选中img类型，调用addImgMsg方法，addImgMsg里面调用setPicSize，插入信息到msgImgList和msgList中  
+
+```js
+// 第一步 通过点击触发****************
+// 选择图片发送
+            chooseImage(){
+                this.getImage('album');
+            },
+            //拍照发送
+            camera(){
+                this.getImage('camera');
+            },
+    
+    
+// 第二部 调用getImage里面会调用uni.chooseImage和getImageInfo*******************
+			//选照片 or 拍照
+			getImage(type){
+				this.hideDrawer();
+				uni.chooseImage({
+					// 选择图片是拍照还是从相册中找
+					sourceType:[type],
+					sizeType: ['original', 'compressed'], //可以指定是原图还是压缩图，默认二者都有
+					success: (res)=>{
+						for(let i=0;i<res.tempFilePaths.length;i++){
+							uni.getImageInfo({
+								// 获取图片信息
+								src: res.tempFilePaths[i],
+								// 成功回调
+								success: (image)=>{
+									console.log(image.width);
+									console.log(image.height);
+									let msg = {url:res.tempFilePaths[i],w:image.width,h:image.height};
+									this.sendMsg(msg,'img');
+								}
+							});
+						}
+					}
+				});
+			},
+                
+// 第三步 调用sendMsg方法更新时间、id和形成固定msg格式 调用screenMsg（msg）方法到达img分支中
+			// 接受消息(筛选处理)筛选信息的处理方式
+			screenMsg(msg){
+				//从长连接处转发给这个方法，进行筛选处理
+				if(msg.type=='system'){
+					// 系统消息
+					switch (msg.msg.type){
+						case 'text':
+							this.addSystemTextMsg(msg);
+							break;
+						case 'redEnvelope':
+							this.addSystemRedEnvelopeMsg(msg);
+							break;
+					}
+				}else if(msg.type=='user'){
+					// 用户消息
+					switch (msg.msg.type){
+						case 'text':
+							this.addTextMsg(msg);
+							break;
+						case 'voice':
+							this.addVoiceMsg(msg);
+							break;
+                          // 图片到达这里**************************
+						case 'img':
+							this.addImgMsg(msg);
+							break;
+						case 'redEnvelope':
+							this.addRedEnvelopeMsg(msg);
+							break;
+					}
+					console.log('用户消息');
+					//非自己的消息震动
+					if(msg.msg.userinfo.uid!=this.myuid){
+						console.log('振动');
+						uni.vibrateLong();
+					}
+				}
+				this.$nextTick(function() {
+					// 滚动到底 滚动到最新的msg的id上去
+					this.scrollToView = 'msg'+msg.msg.id
+				});
+			},
+// 第四部调用addImgMsg方法传入msg，调用setPicSize和插入数据到msgImgList和msgList中
+			// 添加图片消息到列表
+			addImgMsg(msg){
+				// 更改图片的大小
+				msg.msg.content = this.setPicSize(msg.msg.content);
+				// 插入图片的url地址到imagelist中
+				this.msgImgList.push(msg.msg.content.url);
+				// 插入信息
+				this.msgList.push(msg);
+			},
+```
+

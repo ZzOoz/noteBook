@@ -1,6 +1,24 @@
 # TypeScript知识总结
 
-## 1、对于静态类型的理解
+
+
+## 将js文件转化为ts文件
+
+```js
+// 首先npm
+npm install typescript -g
+// 后面使用tsc将js文件解析成ts文件
+tsc demo.js
+
+// 还有一种方法是下载ts-node
+npm install ts-node -g
+// 直接运行
+ts-node demo.js
+```
+
+
+
+## 对于静态类型的理解
 
 ```js
 // 这是一个静态类型
@@ -148,7 +166,7 @@ const objArr2:Teacher[] = [
 ]
 ```
 
-元组：元组是一个可以限制数组类型同时可以限制数组数量的方式
+元组：元组是一个可以限制数组类型同时可以限制数组数量的方式，有组织的数组，你需要以正确的顺序预定义数据类型。
 
 ```js
 // 这里硬性规定了数组里面只能是字符串、数字、数字
@@ -161,3 +179,26 @@ const teacher:[string,number,number][] = [
 ]
 ```
 
+
+
+## Interface接口
+
+
+
+## 类型断言
+
+定义：可以用来手动指定一个值的类型。
+
+定义的方法有两种
+
+```js
+const str = 'this is a string'
+// 使用as
+const num:number = (str as string).length
+// 使用尖括号
+const num1:number = (<string>str).length
+```
+
+
+
+## 泛型

@@ -183,6 +183,158 @@ const teacher:[string,number,number][] = [
 
 ## Interface接口
 
+### Interface接口和type类型别名
+
+在Ts中，接口和类型别名是很相似的，但是也是有区别的，比如interface接口是不能代表基础类型，而type可以
+
+```js
+/1、
+// 两者很相似
+interface Person{
+	name:string
+}
+
+type Person{
+	name:string 
+}
+
+/2、
+// 但是类型别名可以定义基础类型，而接口不可以
+type Str = String
+
+// 这样是会报错的
+interface Str1 = String
+
+/3、
+// 继承方面
+// 接口继承接口
+interface Person{
+    name:string,
+}
+
+interface man extends Person{
+    age:12
+}
+    
+// 接口继承类型别名
+type hobby = {
+    type:String
+}    
+
+interface woman extends hobby {
+    age:13
+}
+    
+// 类型别名继承接口
+interface Person{
+    name:String,
+}
+
+type a = Person & {
+    age:12
+}
+    
+// 类型别名继承类型别名
+type hobby = {
+    type:String
+}
+    
+type b = hobby & {
+    age:11
+}
+```
+
+
+
+### Interface接口可选属性和只读属性
+
+步骤：可选属性在之后面加上问好、只读属性在属性前加上readonly
+
+```ts
+interface Person{
+	name:string,
+	age?:number,
+	readonly gender:boolean
+}
+```
+
+### 类中使用interface接口和函数接口
+
+```js
+// 类中使用接口
+interface Person{
+	name:string,
+	age?:number,
+	readonly gender:boolean,
+	say():string,
+}
+
+class A implements Person{
+	name:'hyt'
+	say(){
+        return 'hello'
+    }
+}
+
+// 定义函数接口
+interface sayHi{
+    // 意思时参数时string，返回值时string
+    (str:string):string
+}
+
+const say:SayHi = (str:string) => {
+    return str
+}
+```
+
+
+
+### Interface接口的注意事项
+
+**1.当将一个变量直接赋值给函数中会实行强校验，因此在不想使用强校验的情况下，请将变量先作为缓存，再将属性传进去**
+
+```js
+interface Person{
+	name:String,
+	age?:Number,
+	readonly gender:Boolean
+}
+
+const getPersonName = (person:Person):void => {
+	console.log(person.name)
+}
+
+const setPersonName = (person:Person,name:String):void => {
+	person.name = name
+}
+
+// 我们多了一个hobby的属性，当我把值缓存在这里时 再传到方法中是不会报错的
+const person = {
+    name:'hyt',
+    age:12,
+    gender:false,
+    hobby:'PE'
+}
+
+// getPersonName({
+//     name:'hyt',
+//     age:12,
+//     gender:false,
+//     // 直接这样作为变量传入时会报错的,因为这里会做强类型校验，
+//     // 如果想让这个成功通过这个校验，在接口中定义[propsName:string]:stirng
+//     // 意思时key为字符串，value为字符串
+//     hobby:'PE'
+// })
+
+// 但是这样是不会报错，这里不会做强类型校验
+getPersonName(person)
+
+```
+
+
+
+**2.当编译ts文件时，interface并不会转化成js语法，实际上只是ts将其作为提示的工具而已**
+
 
 
 ## 类型断言
@@ -202,3 +354,203 @@ const num1:number = (<string>str).length
 
 
 ## 泛型
+
+
+
+## TS中的类
+
+### super关键字
+
+ts中的super：ts中的super可以继承父类中的方法，如果想要获取到父类之前的方法或者属性，在子类中使用，那么可以使用super
+
+```ts
+class F{
+    name = 'hyt';
+    say(){
+        return this.name
+    }
+}
+
+class S extends F{
+    say(){
+    	// 覆盖了父类的方法，使用了super继承之前的方法加上自己的逻辑
+        return super.say() + 'hello'
+    }
+}
+
+const s = new S()
+console.log(s.sayHi())
+```
+
+
+
+### Ts中类的访问类型（public、protected、private）
+
+**public:允许我在类内和类外被调用**
+
+**private：允许我在类内被调用，其余的不可以**
+
+**protected：允许我在类内以及继承的子类中使用**
+
+```js
+class A{
+    //**public:允许我在类内和类外被调用*
+    public name:string
+    //**private：允许我在类内被调用，其余的不可以**
+    private age:number
+    //**protected：允许我在类内以及继承的子类中使用**
+    protected gender:boolean
+}
+
+class B extends A{
+    say(){
+        // name时public可以使用
+        console.log(this.name);
+        // age是private不可以使用
+        console.log(this.age);
+        // gender是protected可以使用
+        console.log(this.gender)
+    }
+}
+
+const a = new A()
+// name时public可以使用
+console.log(a.name)
+// age是private不可以使用
+console.log(a.age)
+// gender是protected不可以使用
+console.log(a.gender)
+```
+
+
+
+### Ts中类的constructor
+
+**constructor会在实例化一个实例的时候会被调用比如：const a = new Person 会调用Person这个类的constructor**
+
+```js
+// 使用constructor的方法之一
+// class A {
+//     name:string
+//     constructor(name:string){
+//         this.name = name
+//     }
+// }
+//还可以简化
+class A{
+    constructor(public name:string){
+        this.name = name
+    }
+}
+
+const a = new A('hyt')
+console.log(a.name)
+```
+
+```js
+ class A{
+     constructor(public name:string){
+
+     }
+ }
+
+ class B extends A{
+    // 继承了父类之后使用构造器construcor后要使用super再次调用父类的构造器
+    // 同时按照父类的的传参来传参
+    constructor(public age:number){
+         super('hyt')
+     }
+ }
+
+ const b = new B(22)	
+```
+
+
+
+### getter和setter
+
+**类中的getter作用是获取一个值，setter是改变一个值，他们的使用场景是当获取（改变）一个私有属性的时候我们可能不能再类外直接使用，那么可以借助getter和setter**
+
+```ts
+class H{
+    // 这样做的好处是我们不能改变私有变量，但是可以通过改变get、set
+    // 来间接改变_name 保证数据的安全
+    constructor(private _name:string){}
+    get name(){
+        return this._name + 'gogo'
+    }
+    set name(name:string){
+        this._name = name
+    }
+}
+
+const h = new H('hyt')
+// 这里调用的是类中的get name
+console.log(h.name)
+// 这里是调用类中的set name
+h.name = 'yuteng'
+console.log(h.name)
+```
+
+
+
+### 静态属性和方法static
+
+**static是一个关键字、意思是当使用static的时候会将属性或者方法挂在类本身而不是实例**
+
+使用static来实现一个单例模式
+
+```ts
+// 单例模式
+class SingleMode{
+    // 创建一个静态、私有的属性只有在类内使用并且挂在类上
+    private static instance:SingleMode
+    constructor(public name:string){}
+
+    // 新建实例的时候使用这个方法判断是否已经创建
+    static getInstanceMode(){
+        if(!this.instance){
+            this.instance = new SingleMode('yuteng')
+        }
+        return this.instance
+    }
+}
+
+const Single = SingleMode.getInstanceMode()
+const s1 = SingleMode.getInstanceMode()
+console.log(s1 === Single)
+console.log(Single.name)
+```
+
+
+
+### 抽象类abstruct
+
+1、首先抽象类是不能实例化的，它仅仅是一个抽象的东西，具体不知道如何实现，需要在他所继承的子类中得到实现
+
+2、抽象类中有抽象方法，抽象方法也是不能够得到具体实现，但是每当子类继承了抽象类之后需要强制实现这个抽象方法
+
+3、抽象类中除了抽象方法之外还可以实现一些其他的方法和属性，这些都不是抽象的
+
+```ts
+// 抽象类是将一些共有的属性和方法收集，如果是一些方法是对于每个子类共有
+// 但是具体实现要分别在他们其中具体实现就需要使用抽象类
+abstract class AFunc{
+    width:number
+    getType(){
+        return 'AFunc'
+    }
+    // 抽象方法中不能有具体实现
+    abstract getArea():number
+}
+
+class BFunc extends AFunc{
+    // 子类所继承的抽象类要实现具体的抽象方法
+    getArea(){
+        return 123
+    }
+}
+
+const bb = new BFunc()
+```
+

@@ -554,3 +554,141 @@ class BFunc extends AFunc{
 const bb = new BFunc()
 ```
 
+
+
+## TypeScript的编译运转过程的进一步理解
+
+如果我们想要将自己的ts文件打包成js文件上传使用，那么可以在package.json中新增build命令，运行
+
+```js
+"build":"tsc" // 将所有ts文件编译成js文件
+```
+
+如果想要编译到自己想要的目录那么可以在tsconfig.json文件中找到outDir修改，例如修改
+
+```js
+"outDir": "./build",                        /* Redirect output structure to the directory. */
+```
+
+
+
+tsconfig.json文件详解
+
+注意：当我们运行tsc命令+文件名的时候是不会走tsconfig.json的配置的，只有我们运行直接运行tsc命令的时候才会走这个配置，但是值得一提的是，如果使用ts-node命令+文件名运行的话，会走tsconfig.json这个文件的配置
+
+```js
+{
+//                   /*当我们想要使用tsc运行某些特定的文件时那么就可以使用include，意思是运行当前目录的demo.ts文件变异成js  当然也可以使用exclude和file来除去不需要编译的文件和想要编译的文件*/    
+  "include":["./demo.ts"], 
+  "compilerOptions": {
+      "removeComments": true  // 编译时去除注释
+      "noImplicitAny": true,  // 是否需要显式的类型注解any，如果是true,那么在不明确指定any类型会报错
+  	  "strictNullChecks": true,  // 是否强制对null进行校验检查，是就会检查
+ 	  "outDir": "./",    // 是指运行tsc命令后输出的文件位置
+       "rootDir": "./",  // 是指使用tsc命令是编译的文件位置在哪里	
+       "checkJs": true,  // 是否允许对js文件进行检测
+   	   "allowJs": true,  // 是否允许想ts文件一样对js文件进行打包编译（es6转es5，默认打包target是es5）
+       "noUnusedLocals": true,     // 是否对未被使用的变量进行提示
+        "noUnusedParameters": true, // 是否对未被使用的函数参数进行提示
+       "sourceMap":true // 开启sourceMap
+   }
+}
+
+```
+
+
+
+## 联合类型和类型保护
+
+```ts
+interface Bird{
+    fly:boolean,
+    eat:()=>{}
+}
+
+interface Dog{
+    fly:boolean,
+    bark:()=>{}
+}
+
+// 当我们使用联合类型Bird | Dog的时候，通过使用animal是无法使用bark和eat方法的
+// 因为ts无法确认animal是什么类型
+
+// 1.那么我们可以使用类型断言的方式进行类型保护
+function getAnimal(animal:Bird | Dog){
+    if(animal.fly){ 
+        // 如果fly为true，那么类型断言成Bird
+        (animal as Bird).eat()
+    }else{
+        // 否则就是Dog类型
+        (animal as Dog).bark()
+    }
+}
+
+// 2.使用in语法进行类型保护
+function getAnimal2(animal:Bird | Dog){
+    // 如果eat方法在animal中
+    if("eat" in animal){ 
+        // 那么类型断言成Bird
+        (animal as Bird).eat()
+    }else{
+        // 否则就是Dog类型
+        (animal as Dog).bark()
+    }
+}
+
+// 3.使用typeof的方法进行类型保护
+function add(first:number | string,second:number | string){
+    if(typeof first === 'string' && typeof second === 'string'){
+        return first + second
+    }
+}
+
+// 4.使用instanceof的方法进行类型保护
+
+// 只有类才有instanceof的语法 interface是没有的
+class NumObj {
+    count:number
+}
+
+function addSecond(first:object | NumObj,second:object | NumObj){
+    if(first instanceof NumObj && second instanceof Number){
+        return first.count + second.count
+    }
+    return 0
+}
+```
+
+
+
+## 枚举类型
+
+使用场景：对于多个状态的不同推断可以使用枚举类型
+
+```ts
+enum Status{
+    // 枚举默认从0开始，如果改变了一个值得枚举数字，那么就会从这个改变的开始递增
+    onLine,
+    offLine,
+    deleted
+}
+
+// 这样可以反推出枚举的值
+console.log(Status[0])
+
+function getResult(status){
+    if(status === Status.onLine){
+        return 'onLine'
+    }else if(status === Status.offLine){
+        return 'offLine'
+    }else if(status === Status.deleted){
+        return 'deleted'
+    }
+}
+
+// 这样也可以
+console.log(getResult(0))
+// 这样也可以
+console.log(getResult(Status.onLine))
+```
+

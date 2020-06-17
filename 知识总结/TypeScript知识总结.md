@@ -692,3 +692,96 @@ console.log(getResult(0))
 console.log(getResult(Status.onLine))
 ```
 
+
+
+## 泛型
+
+**泛型是指泛指的类型，通常用来复用多种不同的类型**
+
+
+
+### **函数泛型**
+
+```ts
+// 泛型
+function join<T>(first:T,second:T){
+    return `${first}${second}`
+}
+
+// params是一个数组，里面的格式是泛型约定的
+function map<T>(parmas:T[]){
+    return parmas
+}
+
+// 同时还可以定义多种泛型
+function each<T,P>(first:T,second:P){
+    return `${first}${second}`
+}
+
+// 通过制定T中的类型是string 来确定first和second的类型（他们都是用来T作为他们的类型）
+join<string>('1','2')
+join<number>(1,2)
+
+// 当我们不指定泛型的时候ts会进行类型推断
+join('1','2')
+
+// 使用map函数
+map<string>(['123'])
+
+// 定义多个泛型
+each<string,number>('123',123)
+
+
+
+// 如何使用泛型作为一个具体的类型注解
+// 首先<T>(params:T) => T是一个类型注解 是使用了T泛型这个概念
+// 其次等号后面是函数的具体实现
+const func:<T>(params:T) => T = <T>(params:T)=>{
+    return params
+}
+
+// 相当于
+function Hello<T>(params:T):T{
+    return params
+}
+
+const func1:<T>(params:T) => T = Hello
+```
+
+
+
+### 类的泛型
+
+```ts
+// 类泛型
+
+interface Item{
+    name:string
+}
+
+// T extends Item 的意思是T要继承item里面的所有的东西
+class DataManager<T extends Item>{
+    constructor(private data:T[]){}
+    getItem(index:number):string{
+        return this.data[index].name
+    }
+}
+```
+
+
+
+## 使用parcel打包Ts代码
+
+首先使用npm安装parcel的包
+
+```js
+npm i parcel@next
+```
+
+后面在package.json中加入命令
+
+```js
+"dev":"parcel ./src/index.html" // 使用parcel运行index.html
+```
+
+后面在index.html中引入demo.ts后就可以直接使用npm run dev来跑一个服务器了

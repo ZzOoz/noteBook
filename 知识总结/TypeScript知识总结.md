@@ -784,4 +784,4 @@ npm i parcel@next
 "dev":"parcel ./src/index.html" // 使用parcel运行index.html
 ```
 
-后面在index.html中引入demo.ts后就可以直接使用npm run dev来跑一个服务器了
+后面在index.html中引入demo.ts后就可以直接使用npm run dev来跑一个服务器了 

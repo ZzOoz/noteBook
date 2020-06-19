@@ -785,3 +785,287 @@ npm i parcel@next
 ```
 
 后面在index.html中引入demo.ts后就可以直接使用npm run dev来跑一个服务器了 
+
+
+
+## 装饰器
+
+### 类的装饰器
+
+首先在tsconfig.json文件中打开两个注释
+
+```js
+ // 这两个的意思是允许支持ES7装饰器
+ "experimentalDecorators": true,        /* Enables experimental support for ES7 decorators. */
+ "emitDecoratorMetadata": true, 
+```
+
+**基本使用**
+
+```ts
+// 类装饰器
+// 类装饰器是一个函数
+// 使用@符号来使用
+
+function decoratorTest(constructor:any){
+    // constructor是必须的，不然会报错，同时可以使用他来进行对类进行修改
+   	constructor.prototype.getName = () => {
+        console.log('getName')
+    }
+    console.log('test')
+}
+
+// 装饰器仅仅是对类进行修饰，无论类实例化多少次都只会执行一次
+@decoratorTest
+class Test{}
+
+const test:any = new Test()
+const test2 = new Test()
+test.getName()
+```
+
+**类装饰器的顺序**
+
+```ts
+// 类装饰器
+// 类装饰器是一个函数
+// 使用@符号来使用
+
+function decoratorTest(constructor:any){
+    console.log('test')
+}
+
+function decoratorTest2(constructor:any){
+    console.log('test2')
+}
+
+// 装饰器仅仅是对类进行修饰，无论类实例化多少次都只会执行一次
+@decoratorTest 
+@decoratorTest2
+class Test{}
+
+const test = new Test()
+// 先打印test2 在打印test 也就是执行顺序是从下到上
+```
+
+**在装饰器中返回一个函数（类似柯力化）**
+
+```ts
+// 类装饰器
+// 类装饰器是一个函数
+// 装饰器的参数是构造函数
+// 使用@符号来使用
+
+// 使用类似柯里化的方法，给函数传参返回函数
+function decoratorTest(flag:boolean){
+    if(flag){
+        return function (constructor:any){
+            constructor.prototype.getName = () => {
+                console.log('getName')
+            }
+            console.log('test')
+        }
+    }else{
+        return function(constructor:any){}
+    }
+
+}
+
+@decoratorTest(false)
+class Test{}
+
+const test:any = new Test()
+test.getName()
+```
+
+**更加复杂的写法①**
+
+```ts
+// 更加复杂的装饰器写法
+
+// T extends new (...agrs:any[])=>any 表示的是这个泛型是继承一个构造函数
+// 构造函数的参数是args，约束是一个any类型的数组，返回any类型
+// 将这个泛型给到constructor中
+function testDecroator<T extends new (...args:any[])=>any>(constructor:T){
+    // 这里表明被装饰的class 继承这个构造函数的属性
+    return class extends constructor{
+        // 这里的执行顺序先执行被装饰类里面的代码，后执行装饰器的代码
+        name = 'hyt'
+        getName(){
+            return this.name
+        }
+    }
+}
+
+@testDecroator
+class Test{
+    constructor(public name:string){
+        console.log('1')
+        // 先执行这里的hyt222 后面知道有装饰器就会执行装饰器的代码
+        this.name = name
+        console.log('2')
+    }
+}
+
+const test = new Test('hyt222')
+console.log((test as any).getName())
+```
+
+**更加复杂的写法②**
+
+```ts
+// 更加复杂的装饰器写法
+
+// T extends new (...agrs:any[])=>any 表示的是这个泛型是继承一个构造函数
+// 构造函数的参数是args，约束是一个any类型的数组，返回any类型
+// 将这个泛型给到constructor中
+function testDecroator(){
+    return function <T extends new (...args:any[])=>any>(constructor:T){
+        // 这里表明被装饰的class 继承这个构造函数的属性
+        return class extends constructor{
+            // 这里的执行顺序先执行被装饰类里面的代码，后执行装饰器的代码
+            name = 'hyt'
+            getName(){
+                return this.name
+            }
+        }
+    }
+}
+
+const Test = testDecroator()(
+    class {
+        name:string
+        constructor(name:string){
+            this.name = name
+        }
+    }
+)
+
+
+const test = new Test('hhh')
+// 为什么要这样写？因为这样会有更好的语法提示
+// 而上面的第一种复杂的写法是没有很好的语法的
+test.getName()
+```
+
+
+
+### 方法装饰器
+
+首先要注意的是：
+
+​	1.在普通方法里面，target对应的是类的prototype，key代表的是方法名，descriptor指的是对这个方法的描述符（value，writeable等）
+
+​	2.在静态方法里面，target对应的是类的构造函数，key代表的是方法名，descriptor指的是对这个方法的描述符（value，writeable等）
+
+```ts
+// 2、函数装饰器
+
+function decoratorGetName(target:any,key:string,decorator:PropertyDescriptor){
+    // target在普通方法和静态方法是不同的
+    console.log(target)
+    // key是方法名
+    console.log(key)
+
+    // 这里decorator.value意味着可以对装饰的方法进行重写
+    decorator.value = function(){ 
+        console.log('123')
+    }
+    // decorator.writeable = false  // 这里意味着不可以对进行重写（在外部）
+}
+
+class Test{
+    constructor(public name:string){
+        this.name = name
+    }
+    @decoratorGetName
+    getName(){
+        return this.name
+    }
+}
+
+const test = new Test('hyt')
+test.getName()
+```
+
+
+
+**访问器的装饰器**
+
+**需要注意的是：访问器的装饰器的参数与方法装饰器的参数是一样的，但是如果在get和set里面都加入了装饰器是会报错的**
+
+```ts
+// 3.访问器的装饰器
+function visit(target:any,key:string,decorator:PropertyDescriptor){
+    // 对访问器的装饰不能写入
+    decorator.writable = false
+}
+
+class Test{
+    constructor(private _name:string){
+        this._name = _name
+    }
+    get name(){
+        return this._name
+    }
+    @visit
+    set name(name){
+        this._name = name
+    }
+}
+
+const test = new Test('hyt')
+console.log(test.name)
+test.name = 'hhh'
+// 当有了visit的访问器装饰器时，既不能够修改了writable = false
+console.log(test.name)
+```
+
+**属性装饰器**
+
+**1.修改属性的描述符**
+
+```ts
+// 4.属性装饰器
+
+// 接受的参数target是class的prototype原型，key是属性值
+function propDecorator(target:any,key:string):any{
+    const decorator : PropertyDescriptor = {
+        writable:false
+    }
+    // 一定要返回
+    return decorator
+}
+
+class Test{
+    // 加入装饰后不能写入
+    @propDecorator
+    name = '123'
+}
+
+const test = new Test()
+console.log(test.name)
+```
+
+**2.在装饰器中给属性赋值时是给原型上的属性赋值，不是实例上的，这是需要注意的**
+
+```ts
+// 4.属性装饰器
+
+// 接受的参数target是class的prototype原型，key是属性值
+function propDecorator(target:any,key:string):any{
+    // 这里是给类的原型上的name赋值
+    target[key] = '原型'
+}
+
+class Test{
+    @propDecorator
+    // 这里是给实例上的name属性赋值
+    name = '实例'
+}
+
+const test = new Test()
+console.log(test.name)
+console.log((test as any).__proto__.name)
+```
+

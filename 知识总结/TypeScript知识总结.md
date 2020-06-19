@@ -574,7 +574,7 @@ const bb = new BFunc()
 
 tsconfig.json文件详解
 
-注意：当我们运行tsc命令+文件名的时候是不会走tsconfig.json的配置的，只有我们运行直接运行tsc命令的时候才会走这个配置，但是值得一提的是，如果使用ts-node命令+文件名运行的话，会走tsconfig.json这个文件的配置
+注意：当我们运行tsc命令+文件名的时候是不会走tsconfig.json的配置的，只有我们直接运行tsc命令的时候才会走这个配置，但是值得一提的是，如果使用ts-node命令+文件名运行的话，会走tsconfig.json这个文件的配置
 
 ```js
 {
@@ -673,7 +673,7 @@ enum Status{
     deleted
 }
 
-// 这样可以反推出枚举的值
+// 这样可以反推出枚举的值 onLine
 console.log(Status[0])
 
 function getResult(status){
@@ -686,9 +686,9 @@ function getResult(status){
     }
 }
 
-// 这样也可以
+// 这样也可以onLine
 console.log(getResult(0))
-// 这样也可以
+// 这样也可以onLine
 console.log(getResult(Status.onLine))
 ```
 
@@ -732,7 +732,6 @@ map<string>(['123'])
 each<string,number>('123',123)
 
 
-
 // 如何使用泛型作为一个具体的类型注解
 // 首先<T>(params:T) => T是一个类型注解 是使用了T泛型这个概念
 // 其次等号后面是函数的具体实现
@@ -765,6 +764,55 @@ class DataManager<T extends Item>{
     getItem(index:number):string{
         return this.data[index].name
     }
+}
+```
+
+
+
+## 使用namespace命名空间
+
+```ts
+// namespace.ts文件
+// 表明引用的位置
+/// <reference path="./components.ts" /> 
+
+// namespace 是一个命名空间 她可以将一些全局变量装入命名空间里面，不让其暴露
+namespace Home{
+    // 当我们需要将一些变量或者属性等在外面使用就可以使用export导出
+    // 在new这个实例的时候就要使用new Home.page()这种了
+    export class Page{
+        constructor(){
+            new Components.Header()
+            new Components.Content()
+            console.log('new')
+        }
+    }
+}
+
+```
+
+```ts
+//component.ts
+namespace Components{
+    export interface Footer{
+        name:string
+    }
+
+    export class Header{
+        constructor(){
+            const ele = document.createElement('div')
+            ele.innerHTML = "this is Header"
+            document.body.appendChild(ele)
+        }
+    }
+    
+    export class Content{
+        constructor(){
+            const ele = document.createElement('div')
+            ele.innerHTML = "this is Content"
+            document.body.appendChild(ele)
+        }
+    }    
 }
 ```
 

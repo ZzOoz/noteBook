@@ -1117,3 +1117,66 @@ console.log(test.name)
 console.log((test as any).__proto__.name)
 ```
 
+
+
+**方法参数中的装饰器**
+
+```js
+// target原型、method方法名、paramsIndex参数的索引值（是第几个参数）
+function paramsDecorator(target:any,method:string,paramsIndex:number){
+    console.log(target,method,paramsIndex)
+}
+
+
+class ParamsDecor{
+    getName(@paramsDecorator name:string,key:string){
+        return name
+    }
+}
+
+const param = new ParamsDecor()
+param.getName('hyt','hh')
+```
+
+
+
+**装饰器中的实际例子**
+
+```ts
+// 装饰器中的实际例子
+let userInfo:any = undefined
+
+// 这里定义一个装饰器
+function catchError(msg:string){
+    // 返回这个方法目的是可以在catchError中传参
+    return function(target:any,key:string,descriptor:PropertyDescriptor){
+        const fn = descriptor.value // 这里就是这个方法的执行
+        // 重写这个方法
+        descriptor.value = function(){
+            try{
+                fn()
+            }catch{
+                console.log(msg)
+            }
+        }
+    }
+}
+
+class Test{
+    // 当这个userInfo是不存在的时候，那么我们必须要写一些控制错误的语句，例如try/catch语句
+    // 但是我们不想这么麻烦所以可以使用到装饰器
+    @catchError('userInof.name 不存在')
+    getName(){
+        return userInfo.name
+    }
+    @catchError('userInof.age 不存在')
+    getAge(){
+        return userInfo.age
+    }
+}
+
+const test = new Test()
+test.getAge()
+test.getName()
+```
+

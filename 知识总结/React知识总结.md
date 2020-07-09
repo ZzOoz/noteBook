@@ -280,7 +280,7 @@ export default class App extends Component {
 
 
 
-6、dangerouslySetInnerHTML的使用
+6、dangerouslySetInnerHTML的使用（对于一些富文本的使用，比如说后台传来一连串的html：**<p><span>hhhh</span></p>**等）
 
 ```jsx
 import React, { Component } from 'react'
@@ -336,6 +336,7 @@ export default class Like extends Component {
                 isLike:!prevState.isLike
             }
         },()=>{
+            //由于setState是异步的，如果想获取到最新的state，应该在这个回调里面获取
            console.log(this.state) 
         })
     }

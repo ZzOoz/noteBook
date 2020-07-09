@@ -635,3 +635,84 @@ uni-app 提供内置 CSS 变量
 我们如果通过编辑器右键添加page的话，主包中会自动加入page路径，此时我们再去创建新的分包如果没有去掉主包路径就会报错。
 
 解决方案就是去掉主包中的路径就可以了
+
+
+
+
+
+## uni-app元素节点操作-uni.createSelectorQuery()
+
+在uni-app中是没有window对象和dom对象的（h5中虽然可以使用ref属性，但是放在app和h5里面是无效的会报错），但是有时我们需要`获取页面上节点的一些几何信息`，以帮助我们完成业务和功能的实现，怎么办呢？
+
+```js
+// 使用uni.createSelectorQuery方法返回一个selectorQuery对象
+<template>
+	<view class="content">
+		<view class="text-area" style="position: relative;">
+		<text class="title" style="position: absolute;" id="target">{{title}}</text>
+		</view>
+	</view>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				
+			}
+		},
+		onLoad() {  //页面初始化执行,用户页面获取参数
+			this.getInfo()
+		},
+		onReady() { //页面初次渲染完毕执行
+			this.getInfo()
+		},
+		methods: {
+			getInfo() {
+
+				// 注意：想要拿到元素实例，需要在实例已经挂载到页面上才可以
+                 // 在onload里面调用时，因为页面没有加载完成所以无法看到节点信息，如果在onReady调用，此时页面已经渲染完成，那么调用getInfo就可以看到节点信息
+				const query = uni.createSelectorQuery().in(this);
+				query.select('#target').boundingClientRect(data => {
+					console.log(data)
+				}).exec();
+
+			}
+		}
+	}
+</script>
+```
+
+
+
+## 使用vue语法ref时获取到undefined为空？如何解决？
+
+**1、你在哪里调用，和你调用的对象**
+
+试试在mounted（）里面调用有效果没有
+
+调用的对象是本来就存在的，还是需要数据渲染之后才会出现的，同理，在mounted（）里面调用看看
+
+**2、调用对象是不是数组列表**
+
+  我一开始设置ref在v-for列表上，直接获取this.$refs.name.style，永远是空的，
+
+  后来才发现，this.$refs.name是一个数组，无法通过 .style 获取样式，
+
+  只能遍历这个this.$refs.name数组，在this.$refs.name[index]上设置样式
+
+  但是像高度宽度，可以通过offsetHeight，等来获取。
+
+**3、调用对象是否和v-if结合使用**
+
+ ref不是响应式的，所有的动态加载的模板更新它都无法相应的变化。
+
+解决方案：
+
+　　通过
+
+**setTimeout(() => {**
+
+　　　　**}, 0)**
+
+来得到数据

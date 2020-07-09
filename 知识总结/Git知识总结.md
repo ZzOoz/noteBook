@@ -14,7 +14,7 @@ git reset --hard HEAD^ // 回退上个版本号 HEAD是当版本 HEAD^是上一�
 git reset --hard 0754c9 // 回退上个版本号后 想要回到之前的版本 可以使用这个命令， 但前提是知道git log 后那个git版本的id好0754c9就是id号
 git reflog // 用来记录你的每一次命令
 git checkout -- 文件名 // 其实是用版本库里的版本替换工作区的版本，无论工作区是修改还是删除，都可以“一键还原”。
-
+	
 git checkout -b dev || git switch -c dev // 创建分支dev
 git branch // 命令查看当前分支
 git checkkout 分支名 || git switch 分支名// 切换分支

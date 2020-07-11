@@ -366,6 +366,34 @@ export default class Like extends Component {
 
 **首先：constructor只会执行一次，pureComponent会进行一层浅比较**
 
+**常见的生命周期：**
+
+**（1）constructor**
+
+**使用场景：**通常给this.state赋值来初始化内部的state（不要在该生命周期内使用this.setState）、对事件处理函数进行绑定实例
+
+**注意事项：**不要在这个生命周期内进行setState操作、避免将props的值赋值给state（没有必要且props改变不会影响state）
+
+**（2）componentDidMount**
+
+**使用场景：**通常进行网络请求获取数据的生命周期函数、添加订阅事件的地方（取消订阅事件的时候在componentWillUnmount中）、可以使用setState方法（但会有性能问题）
+
+**（3）componentDidUpdate**
+
+**使用场景：**在首次渲染的时候是不会执行的，只有在数据更新的时候才会更新，当组件更新后，可以在此处对 DOM 进行操作。如果你对更新前后的 props 进行了比较，也可以选择在此处进行网络请求。（例如，当 props 未发生变化时，则不会执行网络请求）。
+
+**注意事项：**虽然setState可以在该生命周期可以调用，但是他必须包裹在一个条件语句中，如果不这样做会陷入死循环，还会导致额外的渲染、如果 [`shouldComponentUpdate()`](https://react.docschina.org/docs/react-component.html#shouldcomponentupdate) 返回值为 false，则不会调用 `componentDidUpdate()`。
+
+**（4）componentWillUnmount()**
+
+**使用场景：**`componentWillUnmount()` 会在组件卸载及销毁之前直接调用。在此方法中执行必要的清理操作，例如，清除 timer，取消网络请求或清除在 `componentDidMount()` 中创建的订阅等。
+
+`componentWillUnmount()` 中**不应调用 `setState()`**，因为该组件将永远不会重新渲染。组件实例卸载后，将永远不会再挂载它。
+
+
+
+不常见的生命周期：
+
 
 
 ## 9、react-hooks（新）用于提供函数组件能够像类组件一样使用生命周期和拥有状态的功能

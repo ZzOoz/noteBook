@@ -398,13 +398,281 @@ export default class Like extends Component {
 
 ## 9、react-hooks（新）用于提供函数组件能够像类组件一样使用生命周期和拥有状态的功能
 
+```js
+import React,{useState, useEffect} from 'react'
+import {render} from 'react-dom'
+
+function App() {
+    // 使用useState来定义变量和方法，setCount是方法可以改变变量
+    const [count,setCount] = useState(0)
+    // useEffect类似于生命周期，可以在组件初次渲染和更新时触发
+    useEffect(()=>{
+        document.title = `${count}`
+    })
+    return (
+        <div>
+            <div>{count}</div>
+            <button onClick={()=>{setCount(count + 1)}}>添加</button>
+        </div>
+    )
+}
+render(
+    <App />,
+    document.querySelector('#root')
+)
+
+```
+
 
 
 ## 10、context上下文（用于跨组件通信）
 
+实现一个计算器例子：
+
+```js
+// 这是一个cotext的例子
+import React,{ Component,createContext} from 'react'
+import {render} from 'react-dom'
+
+// 引入createContext解构出来Provider和Consumer
+const {
+    Provider,
+    Consumer:CounterConsumer
+} = createContext()
+
+// 在Provider外面包裹一层CounterProvider
+class CounterProvider extends Component{
+    constructor(){
+        super()
+        this.state = {
+            count:100
+        }
+    }
+
+    // 计算加一方法
+    increment = () => {
+        this.setState({
+            count:this.state.count + 1
+        })
+    }
+
+    // 计算减一方法
+    decrement = () => {
+        this.setState({
+            count:this.state.count - 1
+        })
+    }
+
+    render(){
+        return (
+            // 将所有的值通过value传入
+            <Provider value={{
+                count:this.state.count,
+                onIncrement:this.increment,
+                onDecrement:this.decrement
+            }}>
+                {this.props.children}
+            </Provider>
+        )
+    }
+}
+
+class CounterBtn extends Component{
+    render(){
+        return (
+            // CounterConsumer里面必须接受一个function
+            // 判断handleEvent的类型
+            <CounterConsumer>
+                {
+                    ({onIncrement,onDecrement}) => {
+                        const handlerEvent = this.props.type === 'increment' ? onIncrement : onDecrement
+                        return (
+                            <button type="button" onClick={handlerEvent}>{this.props.children}</button>
+                        )
+                    }
+                }
+            </CounterConsumer>
+        )
+    }
+}
 
 
-## 11、高阶组件
+class Counter extends Component{
+    render(){
+        return (
+            // 这里也是在CounterConsumer里面放一个方法
+            <CounterConsumer>
+                {/* 给counter的值 */}
+                {
+                    ({count})=>{
+                        return (
+                            <span>{count}</span>
+                        )
+                    }
+                }
+            </CounterConsumer>
+        )
+    }
+}
+
+class App extends Component {
+    render() {
+        return (
+            <>
+                <CounterBtn type="decrement">-</CounterBtn>
+                <Counter></Counter>
+                <CounterBtn type="increment">+</CounterBtn>
+            </>
+        )
+    }
+}
+
+render(
+    // 在APP最外面给一层CounterProvider可以共享所有的数据
+    <CounterProvider>
+        <App />
+    </CounterProvider>,
+    document.querySelector("#root")
+)
+
+```
+
+将这个文件分解成一个目录结构
+
+```js
+// index.js文件
+// 这是一个cotext的例子
+import React from 'react'
+import {render} from 'react-dom'
+import App from './App'
+import {CounterProvider} from './CounterStore'
+
+
+render(
+    // 在APP最外面给一层CounterProvider可以共享所有的数据
+    <CounterProvider>
+        <App />
+    </CounterProvider>,
+    document.querySelector("#root")
+)
+
+```
+
+
+
+```js
+// App.js文件
+import React, { Component } from 'react'
+import CounterBtn from './components/CounterBtn'
+import Counter from './components/Counter'
+export default class App extends Component {
+    render() {
+        return (
+            <>
+                <CounterBtn type="decrement">-</CounterBtn>
+                <Counter></Counter>
+                <CounterBtn type="increment">+</CounterBtn>
+            </>
+        )
+    }
+}
+
+```
+
+
+
+```js
+// counterStore.js文件
+import React, { Component,createContext } from 'react'
+
+
+// 引入createContext解构出来Provider和Consumer
+const {
+    Provider,
+    Consumer:CounterConsumer
+} = createContext()
+
+// 在Provider外面包裹一层CounterProvider
+class CounterProvider extends Component{
+    constructor(){
+        super()
+        this.state = {
+            count:100
+        }
+    }
+
+    // 计算加一方法
+    increment = () => {
+        this.setState({
+            count:this.state.count + 1
+        })
+    }
+
+    // 计算减一方法
+    decrement = () => {
+        this.setState({
+            count:this.state.count - 1
+        })
+    }
+
+    render(){
+        return (
+            // 将所有的值通过value传入
+            <Provider value={{
+                count:this.state.count,
+                onIncrement:this.increment,
+                onDecrement:this.decrement
+            }}>
+                {this.props.children}
+            </Provider>
+        )
+    }
+}
+
+export {
+    CounterProvider,
+    CounterConsumer
+}
+
+```
+
+
+
+```js
+// component/CounterBtn/index.js文件
+import React, { Component } from 'react'
+import {CounterConsumer} from '../../CounterStore'
+
+export default class CounterBtn extends Component{
+    render(){
+        return (
+            // CounterConsumer里面必须接受一个function
+            // 判断handleEvent的类型
+            <CounterConsumer>
+                {
+                    ({onIncrement,onDecrement}) => {
+                        const handlerEvent = this.props.type === 'increment' ? onIncrement : onDecrement
+                        return (
+                            <button type="button" onClick={handlerEvent}>{this.props.children}</button>
+                        )
+                    }
+                }
+            </CounterConsumer>
+        )
+    }
+}
+
+```
+
+
+
+```
+// component/Counter/index.js文件
+```
+
+
+
+## 
 
 
 

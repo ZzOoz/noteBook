@@ -666,17 +666,63 @@ export default class CounterBtn extends Component{
 
 
 
-```
+```js
 // component/Counter/index.js文件
+import React, { Component } from 'react'
+import {CounterConsumer} from '../../CounterStore'
+export default class Counter extends Component{
+    render(){
+        return (
+            // 这里也是在CounterConsumer里面放一个方法
+            <CounterConsumer>
+                {/* 给counter的值 */}
+                {
+                    ({count})=>{
+                        return (
+                            <span>{count}</span>
+                        )
+                    }
+                }
+            </CounterConsumer>
+        )
+    }
+}
+
 ```
 
 
 
-## 
+
+
+## 11、HOC和使用装饰器
+
+HOC是高阶组件，将一个组件包裹在一个函数里面，这个函数可以传值进入到该组件
+
+```js
+import React, { Component } from 'react'
+
+// 参数是一个组件
+const withCopyRight = (YourComponents)=>{
+    return class withCopyRight extends Component {
+        render() {
+            return (
+                <div>
+                    <YourComponents />
+                    <div>著作商标</div>
+                </div>
+            )
+        }
+    }
+}
+
+export default withCopyRight
+```
 
 
 
+**使用装饰器的方法步骤**
 
+![image-20200714101652617](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200714101652617.png)
 
 ## 12、redux的使用
 
@@ -690,13 +736,49 @@ export default class CounterBtn extends Component{
 
 #### 12.2、redux的简单实现
 
+简单步骤：1、创建reducers
+
+​				  2、合并reducers
+
+​                  3、createStore传入合并后的reducers
+
+​                  4、使用Provider将store传入，通常在<App />外面包裹一层Provider
+
+​                  5、使用connect(mapStateToProps,{...actionCreators})(YourComponents)
+
+​                  6、使用actionCreators建立action
+
+​                  7、修改reducer
+
+**redux处理同步和异步操作：**
+
+**同步操作**：actionCreator =》 自动dispatch(actionCreator())  =》 触发reducer操作  =》改变store的值  =》view更新
+
+**异步操作**：actionCreator =》 经过middleware处理生成新的action =》手动dispatch(action) =》 触发reducer操作  =》改变store的值  =》view更新
+
+在处理异步操作时需要安装中间件(middleware)
+
+```
+cnpm i redux-thunk -S  // 安装react-thunk
+```
+
 
 
 
 
 ## 13、react-router的使用
 
+BrowerRouter和hashRouter的区别
 
+
+
+数据埋点的多种设置方式：
+
+1.第一种是使用ajax请求（这种方式的确定是有延迟，成功率不高，而且请求频繁）
+
+2.第二种使用img标签，当用户点击的时候可以使用src属性自带参数，请求后台，后台返回一个不同大小的像素的图片来定义状态（这种做法兼容性好）
+
+3.第三种使用sendBecon方法，这种兼容性低，但是成功率高
 
 
 
@@ -704,3 +786,4 @@ export default class CounterBtn extends Component{
 
 
 
+## 15、react-redux的使用

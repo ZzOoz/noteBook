@@ -726,6 +726,76 @@ export default withCopyRight
 
 ## 12、redux的使用
 
+**redux是什么？（它跟vuex状态管理很像，都是使用单一对象进行管理，使用单例模式）**
+
+```
+（1）Web 应用是一个状态机，视图与状态是一一对应的。
+
+（2）所有的状态，保存在一个对象里面。
+```
+
+**redux的基本概念和api**
+
+**store：存放的地方数据，使用createStore来创建一个store，store里面包含了getState、subscribe、dispatch方法**
+
+```
+cosnt store = createStore(reducer) // createStore接受reducer作为参数，注意reducer是一个函数
+```
+
+**state：可以理解为是某一个组件里面的数据，比如cartlist组件里面有他自己的state**
+
+**dispatch:可以理解为是view向action发送通知说你要改变state了**
+
+```
+store.dispatch(action) // 接受action，action里面有type和payload
+```
+
+**action：他是惟一能够改变state的唯一方法，是view视图层发出的通知(而这个通知就是使用dispatch)，通知state要发生变化了**
+
+**actionCreateor：实际上是一个函数，简单来说就是可以传参的action**
+
+```js
+// 这就是一个actionCreator
+export const add = (id) => {
+	return {
+		type:'INCREMENT',
+		payload:{
+        	id // 可传参
+        }
+	}
+}
+
+// 普通的action
+const add = {
+    type:"INCREMENT"
+}
+```
+
+
+
+**reducer：可以理解为对state各个阶段的处理方式，是一个处理器，但是每次都必须要 返回一个新的state**
+
+```js
+export default (state=initState,action) => {
+	switch(action.type){
+		case 'INCREMENT':
+			return {
+				...state,
+				count:state.count + 1
+			}
+   		case 'DECREMENT':
+			return {
+				...state,
+				count:state.count - 1
+			}
+		default:
+			return state  // 这里就不是break咯，应该返回一个state
+	}
+}
+```
+
+
+
 #### **12.1、使用的原则：**
 
 1、唯一数据源
@@ -770,7 +840,26 @@ cnpm i redux-thunk -S  // 安装react-thunk
 
 BrowerRouter和hashRouter的区别
 
+react-router的基本使用（注意：当路由匹配第一个路由之后，第二个路由就不会在匹配了）
 
+**path的使用：**
+
+通配符的使用规则：
+
+```
+（1）：paramsName（例子：/user/:id或者/:name/:id等）
+:paramName匹配URL的一个部分，直到遇到下一个/、?、#为止。这个路径参数可以通过this.props.params.paramName取出。
+（2）使用（）
+()表示URL的这个部分是可选的。
+（3）使用*
+*匹配任意字符，直到模式里面的下一个字符为止。匹配方式是非贪婪模式。
+（4）使用**
+** 匹配任意字符，直到下一个/、?、#为止。匹配方式是贪婪模式。
+```
+
+**browerHistory和hashHistory的区别和使用**
+
+参考这篇文章：https://www.cnblogs.com/nangezi/p/11490778.html
 
 数据埋点的多种设置方式：
 

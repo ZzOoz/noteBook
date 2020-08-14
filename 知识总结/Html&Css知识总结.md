@@ -138,3 +138,66 @@ CSS的选择器其实大类的话可以分为三类，即id选择器、class选�
 
 
 ### 4.background属性
+
+
+
+## 怎么让Chrome支持小于12px 的文字
+
+
+
+针对谷歌浏览器内核，加webkit前缀，用transform:scale()这个属性进行缩放！
+
+```js
+.text {
+    -webkit-transform: scale(0.8);
+}
+```
+
+
+
+## 行内元素和块级元素的具体区别是什么？行内元素的 padding 和 margin 可设置吗？
+
+**块级元素( block )特性：**
+
+总是独占一行，表现为另起一行开始，而且其后的元素也必须另起一行显示；
+
+宽度(width)、高度(height)、内边距(padding)和外边距(margin)都可控制；
+
+**内联元素(inline)特性：**
+
+和相邻的内联元素在同一行;
+
+宽度(width)、高度(height)、内边距的top/bottom和外边距的top/bottom都不可改变（也就是padding和margin的left和right是可以设置的）。
+
+浏览器还有默认的天生inline-block元素（拥有内在尺寸，可设置高宽，但不会自动换行）
+ `<input> 、<img> 、<button> 、<textarea>。`
+
+
+
+## img 图片自带边距的问题是什么原因引起的？如何解决？
+
+图片底部的空隙实际上涉及行内元素的布局模型，图片默认的垂直对齐方式是基线，而基线的位置是与字体相关的。所以在某些时候，图片底部的空隙可能是 2px，而有时可能是 4px 或更多。不同的 font-size 应该也会影响到这个空隙的大小。
+
+1. 转化成（行级）块元素
+
+```css
+ display : block
+```
+
+1. 浮动，浮动后的元素默认可以转化为块元素（可以随意设置宽高属性）
+
+```css
+float ： left；
+```
+
+1. 给 img 定义 vertical-align（消除底部边距）
+
+```css
+img{    
+    border: 0;    
+    vertical-align: bottom;
+}
+```
+
+1. 将其父容器的font-size 设为 0；
+2. 给父标签设置与图片相同的高度

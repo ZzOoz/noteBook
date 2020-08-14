@@ -716,3 +716,110 @@ uni-app 提供内置 CSS 变量
 　　　　**}, 0)**
 
 来得到数据
+
+
+
+## 关于uni-app的uni.request的封装
+
+参考文章：https://www.cnblogs.com/Mijiujs/p/12096199.html
+
+1. 有baseUrl
+2. 有时请求`header中的content-type` 为 `application/x-www-form-urlencoded`
+3. 登录后调用接口header中需要塞token
+4. 在调用接口前对数据可以进行统一处理，比如删除值为null的属性
+5. 在调用接口后某些数据属性为null，在uni app中template里放值为null的属性会显示undefined，可以统一转成无数据
+6. 加载状态（？感觉有点不合理，用promise.all解决好像更好）
+
+在项目目录static的js文件下的新建url.js
+
+```js
+function request(url, data, method = 'get', contentType = 1) {
+    let header = {
+        'content-type':contentType === 1 ? 'application/json' : 'application/x-www-form-urlencoded',
+        Authorization:uni.getStorageSync('authorization') != ''?uni.getStorageSync('authorization'):null
+    }
+    for (let property in data) {
+        if (data[property] == null) {
+            delete data[property]
+        }
+    }
+ 
+    return new Promise((resolve, reject) => {
+        uni.request({
+            url: baseUrl + url,
+            data,
+            method,
+            header,
+            success: (res) => {
+                if (res.statusCode == 200) {
+                    resolve(res)
+                } else if (res.statusCode == 405) {
+                    uni.showToast({
+                        icon: 'none',
+                        title: '请求方法错误',
+                        duration: 1500
+                    });
+                } else if (res.statusCode == 401) {
+                    uni.showToast({
+                        icon: 'none',
+                        title: '未登录或登录状态已超时',
+                        duration: 1500
+                    });
+                    setTimeout(() => {
+                        uni.reLaunch({
+                            url: '/pages/me/user/user',
+                        });
+                    }, 1500)
+                    store.commit('logout')
+                } else {
+                    uni.showToast({
+                        icon: 'none',
+                        title: '请求错误:' + res.statusCode,
+                        duration: 1500
+                    });
+                }
+            },
+            fail: (err) => {
+                console.log('request fail', err)
+                uni.showToast({
+                    icon: 'none',
+                    title: err.errMsg,
+                    duration: 2000
+                });
+                reject(err)
+            }
+        })
+    })
+}
+```
+
+export暴露后，在main.js中直接挂载在vue上
+
+```js
+import { request, urlList } from './common/url.js'
+Vue.prototype.$http= request
+Vue.prototype.$urlList = urlList
+```
+
+页面中的使用：
+
+```js
+this.$http(this.$urlList.login, param, 'post').then(res => {
+    if (res.data.success) {
+         
+    } else {
+         
+    }
+})
+```
+
+如果content-type有其他的自己在方法中配置其他的
+
+
+
+## uni-app公众号授权登录总结
+
+
+
+
+

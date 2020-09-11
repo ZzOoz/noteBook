@@ -617,11 +617,12 @@ console.log(a3)
 
 
 
-### 2、合并数组
+### 2、合并数组和对象
 
 扩展运算符提供了数组合并的新写法。
 
 ```javascript
+// 例1
 const arr1 = ['a', 'b'];
 const arr2 = ['c'];
 const arr3 = ['d', 'e'];
@@ -633,6 +634,11 @@ arr1.concat(arr2, arr3);
 // ES6 的合并数组
 [...arr1, ...arr2, ...arr3]
 // [ 'a', 'b', 'c', 'd', 'e' ]
+
+// 例2
+let ab = { ...a, ...b };
+// 等同于
+let ab = Object.assign({}, a, b);
 ```
 
 不过，这两种方法都是浅拷贝，使用的时候需要注意。
@@ -668,7 +674,7 @@ const [first, ...middle, last] = [1, 2, 3, 4, 5];
 // 报错
 ```
 
-### 4、实现了 Iterator 接口的对象
+### 4、实现了 Iterator 接口的对象转换为数组
 
 任何定义了遍历器（Iterator）接口的对象（参阅 Iterator 一章），都可以用扩展运算符转为真正的数组。
 

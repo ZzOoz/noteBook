@@ -131,17 +131,17 @@ watch: {
 
 ##### **3.2、具体使用**
 
-```js
+```html
 <template>
   <div>
     <!-- 1.绑定a属性的值，a的值在data中 -->
     <div :class="a">class1</div>
-    <!-- 2.Active的存在取决于 isactive的值，为true就说明存在，为false就说明不存 在。 -->
+    <!-- 2.Active的存在取决于 isactive的值，为true就说明存在，为false就说明不存在。 -->
     <div :class="{active:isActive}">class2</div>
     <!-- :class = [“a”,”b”] 
-    在数组中元素带不带引号的问题。带了说明是类名，不带就是data中      的属性对应的值-->
+    在数组中元素带不带引号的问题。带了说明是类名，不带就是data中的属性对应的值-->
     <div :class="['active',a]">class3</div>
-    <!-- 1. 注意 style中是一个对象，中间用，隔开。前者是style属性，值是data      中对应的数值 -->
+    <!-- 1. 注意 style中是一个对象，中间用，隔开。前者是style属性，值是data中对应的数值 -->
     <div :style="styleData">style1</div>
   </div>
 </template>
@@ -1283,7 +1283,7 @@ console.log(obj.c) // 报错
 
 ​		3、执行render函数，生成vnode
 
-​		4、patch（element，vnode）将element和vnode关联显示视图
+​		4、patch（element，vnode）将e lement和vnode关联显示视图
 
 ##### 5.2、更新过程
 
@@ -1401,7 +1401,7 @@ https://www.cnblogs.com/zmyxixihaha/p/10714217.html
 
 **答：**每一个组件都是一个vue实例，如果使用对象的方式 给组件内data赋值，那么当复用组件改变data时会影响所有的组件，如果使用函数的形式那么就是给每一个组件的data设为一个私有变量，不会相互影响
 
-```
+```js
 // data
 data() {
   return {
@@ -1417,8 +1417,6 @@ new Vue({
   template: '<App/>',
   components: {App}
 })
-
-复制代码
 ```
 
 因为组件是用来复用的，且 JS 里对象是引用关系，如果组件中 data 是一个对象，那么这样作用域没有隔离，子组件中的 data 属性值会相互影响，如果组件中 data 选项是一个函数，那么每个实例可以维护一份被返回对象的独立的拷贝，组件实例之间的 data 属性值不会互相影响；而 new Vue 的实例，是不会被复用的，因此不存在引用对象的问题
@@ -1571,7 +1569,7 @@ mounted() {
 
 以上需要手动通过 $emit 触发父组件的事件，更简单的方式可以在父组件引用子组件时通过 @hook 来监听即可，如下所示：
 
-```js
+```html
 //  Parent.vue
 <Child @hook:mounted="doSomething" ></Child>
 

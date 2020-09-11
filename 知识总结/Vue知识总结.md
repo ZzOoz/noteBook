@@ -416,7 +416,7 @@ export default new Vue()
 
 
 
-```js
+```vue
 // bro1.vue组件
 <template>
   <div>
@@ -446,7 +446,7 @@ export default {
 
 
 
-```js
+```vue
 // bro2.vue组件
 <template>
   <div>
@@ -476,7 +476,7 @@ export default {
 
 引用bro1和bro2组件的主组件**(点击bro2的事件会触发bro1的监听成功将title值变成bro2传过去的值)**
 
-```js
+```vue
 <template>
   <div>
   <bro1 /> 
@@ -508,7 +508,7 @@ export default {
 
 **示例**：
 
-```js
+```vue
 // index.vue
 <template>
   <div>
@@ -546,7 +546,7 @@ export default {
 
 childCom1.vue中
 
-```js
+```vue
 // childCom1.vue
 <template class="border">
   <div>
@@ -575,7 +575,7 @@ export default {
 
 childeCom2.vue
 
-```js
+```vue
 // childCom2.vue
 <template>
   <div class="border">
@@ -605,7 +605,7 @@ export default {
 
 childCom3.vue
 
-```js
+```vue
 // childCom3.vue
 <template>
   <div class="border">
@@ -635,7 +635,7 @@ export default {
 
 Father.vue
 
-```js
+```vue
 <template>
   <div>
       <Chlid />
@@ -661,7 +661,7 @@ export default {
 
 Chlid.vue
 
-```js
+```vue
 <template>
   <div>
       <div>{{demo}}</div>

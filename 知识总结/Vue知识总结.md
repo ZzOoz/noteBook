@@ -1694,7 +1694,7 @@ watch: {
 
 ### 21、在vue组件中怎么获取到当前的路由信息？
 
-如果是template中获取直接 `$route` 即可
+如果是template中获取直接 `$route` 即可	
 如果是script中获取 `this.$route`
 可以 `console.log(this.$route)` 查看其详细信息
 
@@ -1793,7 +1793,7 @@ Object.defineProperty的优势如下:
 
 第一种是通过router-link的方式进行跳转
 
-```js
+```html
 // 字符串
 <router-link to="apple"> to apple</router-link>
 // 对象

@@ -189,7 +189,7 @@ export default {
 
 ##### **5.2、遍历数组和对象**
 
-```js
+```vue
 <template>
   <div>
     <!-- 遍历数组 -->
@@ -769,7 +769,7 @@ export default {
 
 父组件
 
-```js
+```vue
 <template>
   <div>
       <ScopeSlot>
@@ -936,7 +936,7 @@ export default {
 
 **简单例子**：
 
-```js
+```vue
 //按需异步加载组件
 <template>
   <div>

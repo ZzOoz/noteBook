@@ -110,7 +110,7 @@ right() {
 
 3、然后在uni-popup.vue下面的style中增加样式
 
-```js
+```css
 .uni-right-mask{
 	opacity: 1;
 }
@@ -121,7 +121,7 @@ right() {
 
 4、最后在使用组件的时候使用mode="right"就ok了
 
-```js
+```html
 <uniPopup ref="select" type="right" v-if="activeTab === 3">
 	里面是内容
 </uniPopup>
@@ -423,7 +423,7 @@ setPicSize(content){
 
 在开发的过程中我们想要修改uni-app原生的组件的样式，那么我们可以在vue文件下面新写下一个style标签（在uni-app中style可以有多个）
 
-```js
+```css
 // 在textarea中穿透原生组件的样式进行修改，注意一定要使用deep和另开启一个style标签
 <style scoped>
 	/deep/ .uni-textarea-textarea{
@@ -644,7 +644,7 @@ uni-app 提供内置 CSS 变量
 
 在uni-app中是没有window对象和dom对象的（h5中虽然可以使用ref属性，但是放在app和h5里面是无效的会报错），但是有时我们需要`获取页面上节点的一些几何信息`，以帮助我们完成业务和功能的实现，怎么办呢？
 
-```js
+```vue
 // 使用uni.createSelectorQuery方法返回一个selectorQuery对象
 <template>
 	<view class="content">

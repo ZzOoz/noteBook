@@ -452,7 +452,7 @@ handlePhoneCall() {
 
 步骤：通过input标签的v-model双向绑定数据（如：姓名、昵称、密码等），通过picker来修改年级、性别等，通过handleSave方法修改
 
-```js
+```vue
 <input class="input" v-model="academicName" />
 // 修改性别、年级使用picker组件，change事件赋值、value是选中的index索引、range是数据源、range-key是选择框里面的选项
 <picker
@@ -512,7 +512,7 @@ async handleSave() {
 
 ​		   3、使用template模板active=0是显示金豆明细详情、active=1时显示兑换记录详情，进行数据渲染
 
-```js
+```vue
 // 步骤1和2
 <div
   v-for="(v, i) in ['金豆明细', '兑换记录']"

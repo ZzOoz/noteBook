@@ -817,7 +817,7 @@ export default {
 
 父组件调用子组件的插槽名
 
-```js
+```vue
 <template>
   <div>
       <NameSlot>
@@ -852,7 +852,7 @@ export default {
 
 子组件
 
-```js
+```vue
 <template>
   <div>
       <slot name="header">我是头部</slot>

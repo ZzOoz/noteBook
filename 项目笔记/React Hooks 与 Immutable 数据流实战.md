@@ -326,185 +326,58 @@ useMemo和useCallback都会在组件第一次渲染的时候执行，之后会�
 
 我们来看一个反例：
 
-```
+```jsx
 import React from 'react';
 
-
-
- 
-
-
-
- 
-
-
-
 export default function WithoutMemo() {
-
-
-
     const [count, setCount] = useState(1);
-
-
-
     const [val, setValue] = useState('');
 
-
-
- 
-
-
-
     function expensive() {
-
-
-
         console.log('compute');
-
-
-
         let sum = 0;
-
-
-
         for (let i = 0; i < count * 100; i++) {
-
-
-
             sum += i;
-
-
-
         }
-
-
-
         return sum;
-
-
-
     }
 
-
-
- 
-
-
-
     return <div>
-
-
-
         <h4>{count}-{val}-{expensive()}</h4>
-
-
-
         <div>
-
-
-
             <button onClick={() => setCount(count + 1)}>+c1</button>
-
-
-
             <input value={val} onChange={event => setValue(event.target.value)}/>
-
-
-
         </div>
-
-
-
     </div>;
-
-
 
 }
 ```
 
 这里创建了两个state，然后通过expensive函数，执行一次昂贵的计算，拿到count对应的某个值。我们可以看到：无论是修改count还是val，由于组件的重新渲染，都会触发expensive的执行(能够在控制台看到，即使修改val，也会打印)；但是这里的昂贵计算只依赖于count的值，在val修改的时候，是没有必要再次计算的。在这种情况下，我们就可以使用useMemo，只在count的值修改时，执行expensive计算：
 
-```
+```jsx
 export default function WithMemo() {
-
-
-
     const [count, setCount] = useState(1);
-
-
-
     const [val, setValue] = useState('');
-
-
-
     const expensive = useMemo(() => {
-
-
 
         console.log('compute');
 
-
-
         let sum = 0;
 
-
-
         for (let i = 0; i < count * 100; i++) {
-
-
-
             sum += i;
-
-
-
         }
-
-
-
         return sum;
-
-
-
     }, [count]);
-
-
-
- 
-
-
-
     return <div>
-
-
-
         <h4>{count}-{expensive}</h4>
-
-
-
         {val}
-
-
-
         <div>
-
-
-
             <button onClick={() => setCount(count + 1)}>+c1</button>
-
-
-
             <input value={val} onChange={event => setValue(event.target.value)}/>
-
-
-
         </div>
-
-
-
     </div>;
-
-
-
 }
 ```
 
@@ -518,95 +391,28 @@ export default function WithMemo() {
 
 上面的useCallback会将我们传递给它的函数fnB返回，并且将这个结果缓存；当依赖a变更时，会返回新的函数。既然返回的是函数，我们无法很好的判断返回的函数是否变更，所以我们可以借助ES6新增的数据类型Set来判断，具体如下：
 
-```
+```jsx
 import React, { useState, useCallback } from 'react';
-
-
-
- 
-
-
-
 const set = new Set();
 
-
-
- 
-
-
-
 export default function Callback() {
-
-
-
     const [count, setCount] = useState(1);
-
-
 
     const [val, setVal] = useState('');
 
-
-
- 
-
-
-
     const callback = useCallback(() => {
-
-
-
         console.log(count);
-
-
-
     }, [count]);
-
-
-
     set.add(callback);
-
-
-
- 
-
-
-
- 
-
-
-
+    
     return <div>
-
-
-
         <h4>{count}</h4>
-
-
-
         <h4>{set.size}</h4>
-
-
-
         <div>
-
-
-
             <button onClick={() => setCount(count + 1)}>+</button>
-
-
-
             <input value={val} onChange={event => setVal(event.target.value)}/>
-
-
-
         </div>
-
-
-
     </div>;
-
-
-
 }
 ```
 
@@ -616,111 +422,36 @@ export default function Callback() {
 
 使用场景是：有一个父组件，其中包含子组件，子组件接收一个函数作为props；通常而言，如果父组件更新了，子组件也会执行更新；但是大多数场景下，更新是没有必要的，我们可以借助useCallback来返回函数，然后把这个函数作为props传递给子组件；这样，子组件就能避免不必要的更新。
 
-```
+```jsx
 import React, { useState, useCallback, useEffect } from 'react';
-
-
 
 function Parent() {
 
-
-
     const [count, setCount] = useState(1);
 
-
-
     const [val, setVal] = useState('');
-
-
-
- 
-
-
-
+    
     const callback = useCallback(() => {
-
-
-
         return count;
-
-
-
     }, [count]);
-
-
-
+    
     return <div>
-
-
-
         <h4>{count}</h4>
-
-
-
         <Child callback={callback}/>
-
-
-
         <div>
-
-
-
             <button onClick={() => setCount(count + 1)}>+</button>
-
-
-
             <input value={val} onChange={event => setVal(event.target.value)}/>
-
-
-
         </div>
-
-
-
     </div>;
-
-
-
 }
-
-
-
- 
-
-
-
 function Child({ callback }) {
-
-
-
     const [count, setCount] = useState(() => callback());
-
-
-
     useEffect(() => {
-
-
-
         setCount(callback());
-
-
-
     }, [callback]);
-
-
-
     return <div>
-
-
-
         {count}
-
-
-
     </div>
-
-
-
 }
 ```
 
@@ -729,3 +460,11 @@ function Child({ callback }) {
 ### 多谈一点：
 
 useEffect、useMemo、useCallback都是自带闭包的。也就是说，每一次组件的渲染，其都会捕获当前组件函数上下文中的状态(state, props)，所以每一次这三种hooks的执行，反映的也都是当前的状态，你无法使用它们来捕获上一次的状态。对于这种情况，我们应该使用ref来访问。
+
+
+
+## this.setState整理
+
+参考：https://segmentfault.com/a/1190000015463599?utm_source=tag-newest
+
+**在多数情况下this.setState是异步更新的，在setTimeout、setInterval、以及一些addEventListener里面是以同步更新的**

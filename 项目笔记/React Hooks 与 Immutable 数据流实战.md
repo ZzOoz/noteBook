@@ -1,6 +1,8 @@
 # [React Hooks 与 Immutable 数据流实战](https://juejin.cn/book/6844733816460804104)
 
+## redux之compose的理解
 
+參考：https://blog.csdn.net/astonishqft/article/details/82791622
 
 ## react-router-config的使用
 

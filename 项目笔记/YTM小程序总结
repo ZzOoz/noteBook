@@ -1,0 +1,159 @@
+# 1、动态
+
+### 功能简介：实现瀑布流布局、发布(支持视频和相册)、点击详情上下滑动切换、多级评论等
+
+### 1.1、动态瀑布流布局实现
+
+#### **(a)：初始化数据渲染**
+
+**思路：编写一个masonry组件，在页面通过id获取该组件的实例，调用方法并传参**
+
+```javascript
+// 关键实现（渲染）
+
+// 1.使用组件的页面内
+  
+// 刷新渲染瀑布流，items是通过网络请求获取得来的数组
+  _doRefreshMasonry(items) {
+    this.masonryListComponent = this.selectComponent('#masonry');
+    this.setData({ hideSkeleton: true, showItems:true })
+    this.masonryListComponent.start(items).then(() => {
+      console.log('refresh completed')
+    })
+  },
+      
+      
+ // 2.组件内(渲染的核心方法有：start、_render、_refresh)
+    
+     // --2.1 start方法--
+     start(items) {
+      if(items.length > 0) {
+        this.setData({hasItems:true})
+      }else {
+        this.setData({hasItems:false})
+      }
+      // 判断类型
+      if (Object.prototype.toString.call(items) !== '[object Array]') {
+        console.error("[masonry]参数类型错误，渲染失败");
+        return false;
+      }
+		
+      this.setData({
+        items: [],
+        stopMasonry: false,
+      })
+      
+      // 通过refresh方法渲染items，注意：这里的items是有值的，因为setData是异步所以当时的items是有值的
+      return this._refresh(items);
+    },
+        
+    // --2.2 refresh方法--
+    _refresh(items,status) {
+      // 获取这个组件的实例
+      const query = wx.createSelectorQuery().in(this)
+      // 选择id为left-col-inner和right-col-inner的两个标签的信息
+      this.columnNodes = query.selectAll('#left-col-inner, #right-col-inner')
+	  
+      // 返回一个Promise 调用render方法通过索引0开始，因为_render方法会循环调用 所以当最后完成时会调用resolve
+      return new Promise((resolve, reject) => {
+        this._render(items, 0,status ,() => {
+          resolve()
+        })
+      })
+    },
+        
+    
+    // --2.3 render方法--
+    _render(items, i, status = 'NORMAL' , onComplete) {
+      if (items.length > i && !this.data.stopMasonry) {
+        this.columnNodes.boundingClientRect().exec(arr => {
+          // 获取每个item的信息
+          const item = items[i]
+          // 获取组件左右两侧的高度
+          const rects = arr[0]
+          const leftColHeight = rects[0].height
+          const rightColHeight = rects[1].height
+          // 删除后调用
+          if(status === 'DELETE'){
+            this.setData({
+              items: [...this.data.items]
+            }, () => {
+              this._render(items, ++i,'DELETE', onComplete)
+            })
+          } else {
+            // 正常渲染调用
+            this.setData({
+              // 每个循环插入 并且新增他的所属位置
+              items: [...this.data.items, {
+                ...item,
+                columnPosition: leftColHeight <= rightColHeight ? 'left' : 'right'
+              }]
+            }, () => {
+              this._render(items, ++i,'NORMAL', onComplete)
+            })
+          }
+        })
+      } else {
+        onComplete && onComplete()
+      }
+    }
+```
+
+
+
+#### (b)：下拉加载触底拼接数据**
+
+**思路：页面内通过获取组件id调用他的append方法，参数是他获取到的新增的items数组**
+
+```javascript
+// 关键实现（下拉加载触底拼接数据）
+
+// 1.使用组件的页面内
+  
+  // 下拉到底部触发
+  onReachBottom: function () {
+    this.reachBottomGetList()
+  },
+      
+  // 触发底部加载数据
+  async reachBottomGetList() {
+    if (this.data.totalPages <= this.data.pageNum) {
+      this.setData({ loadingFinish: true })
+      return
+    }
+    this.setData({ pageNum: this.data.pageNum + 1, })
+    const params = {
+      pageNum: this.data.pageNum,
+      pageSize: 10,
+      firstTime: this.data.firstTime
+    }
+    await queryYtmList(params).then(res => {
+      this.setData({ items: res.data.data.content, cacheItems:this.data.cacheItems.concat(res.data.data.content) })
+    })
+    this._doAppendMasonry(this.data.items)
+  },
+	
+  // 拼接数据列表渲染瀑布流
+  _doAppendMasonry(items) {
+    this.masonryListComponent = this.selectComponent('#masonry')
+    // 获取接口数据后使用瀑布流组件append方法，当append完成后调用then，是否可触底价在的标志位可以在这里处理
+    this.masonryListComponent.append(items).then(() => {
+      console.log('refresh completed')
+    })
+  },
+      
+      
+// 2、组件内
+  
+  // items是请求后新增的数组
+  append(items) {
+     if (Object.prototype.toString.call(items) !== '[object Array]') {
+       console.error("[masonry]参数类型错误，渲染失败");
+       return false;
+     }
+     this.setData({ stopMasonry: false })
+     // 这里的refresh和上面的refresh一致
+     return this._refresh(items);
+   },
+```
+
